@@ -1,0 +1,28 @@
+{
+  "one_reference": {
+    "image_size": [
+      1000,
+      667
+    ],
+    "samples": 20,
+    "median_ms": 89.53470350024872,
+    "p95_ms": 108.76148564530013,
+    "detected_people": [
+      1
+    ],
+    "delegate": "CPU"
+  },
+  "four_reference_copies": {
+    "image_size": [
+      2000,
+      1334
+    ],
+    "samples": 20,
+    "median_ms": 49.34291099925758,
+    "p95_ms": 68.6745605453325,
+    "detected_people": [
+      0
+    ],
+    "delegate": "CPU"
+  }
+}

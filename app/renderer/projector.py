@@ -77,8 +77,10 @@ def projector_worker(shared, commands, events, config):
 
         screen = open_window()
         clock = pygame.time.Clock()
+        last_timing = 0.0
         running = True
         while running:
+            presented = time.perf_counter()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT or (
                     event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE
@@ -116,6 +118,9 @@ def projector_worker(shared, commands, events, config):
                     surface = pygame.transform.smoothscale(surface, fit)
                 screen.blit(surface, ((sw - fit[0]) // 2, (sh - fit[1]) // 2))
             pygame.display.flip()
+            if time.monotonic() - last_timing >= 1:
+                events.put({"type": "timing", "seconds": time.perf_counter() - presented})
+                last_timing = time.monotonic()
             clock.tick(config["fps"])
     except Exception as exc:
         events.put({"running": False, "error": str(exc)})

@@ -1,0 +1,26 @@
+{
+  "display": "dummy",
+  "checks": [
+    "dashboard_html",
+    "random_new_person_effects_and_follow_scene_override",
+    "composite_jpeg_and_two_synthetic_people",
+    "native_output_resolution_independent_of_camera",
+    "all_five_scenes_and_mode_specific_person_effects",
+    "all_effect_toggles",
+    "four_character_overrides_and_live_previews",
+    "all_manual_cues_without_sound_assets",
+    "seven_live_cues_overlap_expire_and_cancel",
+    "person_assignments_and_max_people",
+    "websocket_live_command_and_status",
+    "controller_disconnect_reconnect_preserves_running_show",
+    "projector_process_fullscreen_toggle_and_stop",
+    "projector_restart",
+    "live_animation_with_camera_stopped",
+    "camera_restart_tracking_reset_scene_reset",
+    "shutdown_with_connected_preview"
+  ],
+  "projector_driver": "dummy",
+  "fps": 23.5,
+  "shutdown_seconds": 0.21,
+  "passed": true
+}

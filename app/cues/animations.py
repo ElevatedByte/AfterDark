@@ -111,7 +111,15 @@ class SpiderDrop(TimedCue):
         y = -0.19 + 0.63 * lift
         h, w = frame.shape[:2]
         # A narrow ROI avoids copying the entire camera frame just for the silk.
-        if y > 0:
+        if y > 0 and hasattr(frame, "sprite"):
+            frame.line(
+                (0.74 * w, 0),
+                (x * w, y * h),
+                (210, 225, 229),
+                max(1, round(w / 640)),
+                self.opacity,
+            )
+        elif y > 0:
             x1, x2 = max(0, int((x - 0.035) * w)), min(w, int((x + 0.035) * w) + 1)
             y2 = min(h, max(1, int(y * h)))
             roi = frame[:y2, x1:x2]

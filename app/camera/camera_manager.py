@@ -14,6 +14,7 @@ class CameraFrame:
     timestamp: float
     sequence: int
     depth: np.ndarray | None = None  # Future aligned depth frame, in meters.
+    capture_ms: float = 0.0
 
 
 class CameraSource(Protocol):
@@ -84,6 +85,7 @@ class CameraManager:
                         cap.set(cv2.CAP_PROP_FRAME_WIDTH, size[0])
                         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, size[1])
                         applied = size
+                    capture_started = time.perf_counter()
                     ok, frame = cap.read()
                     if not ok or frame is None or frame.size == 0:
                         self.connected = False
@@ -100,7 +102,12 @@ class CameraManager:
                         frame = cv2.flip(frame, 1)
                     seq += 1
                     with self._lock:
-                        self._latest = CameraFrame(frame, time.monotonic(), seq)
+                        self._latest = CameraFrame(
+                            frame,
+                            time.monotonic(),
+                            seq,
+                            capture_ms=(time.perf_counter() - capture_started) * 1000,
+                        )
                     self.connected, self.error = True, None
                 except Exception as exc:
                     self.connected = False

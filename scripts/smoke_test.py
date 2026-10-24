@@ -227,6 +227,19 @@ def main():
             s = wait_for(lambda s: s["projector_running"], 20)
             assert s["projector_fullscreen"]
             report["projector_driver"] = s["projector_driver"]
+            # No browser connection is required to keep capture/output alive.
+            time.sleep(0.6)
+            assert status()["projector_running"]
+            with connect(f"ws://127.0.0.1:{port}/ws", proxy=None, open_timeout=5) as ws:
+                restored = json.loads(ws.recv(timeout=3))
+                assert restored["type"] == "status"
+                assert restored["data"]["projector_running"]
+                assert restored["data"]["active_scene"] == "pumpkin_dance"
+            time.sleep(0.4)
+            assert status()["projector_running"]
+            report["checks"].append(
+                "controller_disconnect_reconnect_preserves_running_show"
+            )
             post("/api/settings", {"fullscreen": False})
             wait_for(lambda s: s["projector_running"] and not s["projector_fullscreen"])
             time.sleep(0.4)

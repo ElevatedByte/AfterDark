@@ -75,6 +75,20 @@ class HeadOverlay(Effect):
         fh, fw = frame.shape[:2]
         ah, aw = self.asset.shape[:2]
         anchor = (self.anchor[0] * aw, self.anchor[1] * ah)
+        if hasattr(frame, "sprite"):
+            for x, y, width, angle in self.poses.values():
+                size = max(24, min(width * fw * self.shoulder_scale, fw / 2))
+                frame.sprite(
+                    self.asset,
+                    x * fw,
+                    y * fh,
+                    size,
+                    size * ah / aw,
+                    angle=-angle,
+                    alpha=intensity,
+                    anchor=self.anchor,
+                )
+            return frame
         corners = np.array([[0, 0, 1], [aw, 0, 1], [0, ah, 1], [aw, ah, 1]])
         for x, y, width, angle in self.poses.values():
             size = max(24, min(width * fw * self.shoulder_scale, fw / 2))

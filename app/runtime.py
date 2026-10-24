@@ -13,6 +13,8 @@ from app.renderer.compositor import (
     letterbox_output,
 )
 from app.renderer.projector import Projector
+from app.renderer.metrics import StageMetrics
+from app.renderer.preview import PreviewEncoder
 from app.tracking.pose_tracker import MediaPipePoseTracker
 from app.tracking.person_tracker import PersonTracker
 from app.tracking.gesture_detector import GestureDetector
@@ -36,8 +38,8 @@ class Runtime:
         self.projector = Projector(config)
         self._stop = threading.Event()
         self._thread = None
-        self._preview_lock = threading.Lock()
-        self._jpeg = None
+        self.metrics = StageMetrics()
+        self.encoder = PreviewEncoder(self.metrics)
         self.tracker = None
         self._tracker_retry = 0
         self._tracker_max = config.max_people
@@ -45,6 +47,7 @@ class Runtime:
         self._last_monitor = config.projector_monitor
 
     def start(self):
+        self.encoder.start()
         self._thread = threading.Thread(
             target=self._run, name="show-processing", daemon=True
         )
@@ -54,10 +57,10 @@ class Runtime:
         self._stop.set()
         if self._thread:
             self._thread.join(6)
+        self.encoder.stop()
 
     def preview(self):
-        with self._preview_lock:
-            return self._jpeg
+        return self.encoder.read()
 
     def output_snapshot(self):
         """Encode a full-size still on demand, without slowing the live preview loop."""
@@ -87,6 +90,9 @@ class Runtime:
             self.projector.stop()
             self.state.update(projector_running=False)
         for event in self.projector.poll():
+            if event.get("type") == "timing":
+                self.metrics.record("presentation", event["seconds"])
+                continue
             values = {"projector_running": event["running"]}
             if event.get("error"):
                 values["projector_error"] = event["error"]
@@ -153,7 +159,7 @@ class Runtime:
         cv2.setNumThreads(2)
         last_seq = -1
         last_time = time.monotonic()
-        last_preview = last_stats = last_idle = 0.0
+        last_stats = last_idle = 0.0
         frames = 0
         fps = 0.0
         slow_since = None
@@ -174,7 +180,9 @@ class Runtime:
                     self.gestures.reset()
                     self.effects.reset()
                     self.state.update(tracking_status="idle", person_effects={})
+                started = time.perf_counter()
                 packet = self.camera.latest() if camera_active else None
+                self.metrics.record("capture_poll", time.perf_counter() - started)
                 fresh = (
                     packet is not None
                     and packet.sequence != last_seq
@@ -191,9 +199,18 @@ class Runtime:
                     camera_error=self.camera.error,
                 )
                 if fresh:
+                    started = time.perf_counter()
                     frame = packet.color.copy()
                     last_seq = packet.sequence
+                    self.metrics.record("capture_age", tick - packet.timestamp)
+                    if packet.capture_ms:
+                        self.metrics.record(
+                            "capture_read_and_prepare", packet.capture_ms / 1000
+                        )
+                    self.metrics.record("frame_copy", time.perf_counter() - started)
+                    started = time.perf_counter()
                     people = self._detect(frame, packet.timestamp, snapshot)
+                    self.metrics.record("inference", time.perf_counter() - started)
                     frames += 1
                 elif tick - last_idle >= (
                     1 / self.config.target_fps if self.effects.active_cues else 0.1
@@ -212,22 +229,18 @@ class Runtime:
                     continue
                 dt = min(0.2, max(0.001, tick - last_time))
                 last_time = tick
+                started = time.perf_counter()
                 frame, people = self.process_frame(
                     frame, people, dt, tick, snapshot, fresh
                 )
+                self.metrics.record(
+                    "composition_and_control", time.perf_counter() - started
+                )
+                started = time.perf_counter()
                 self.projector.shared.publish(frame)
-                if tick - last_preview >= 0.12:
-                    thumb = cv2.resize(
-                        frame,
-                        (640, max(1, round(frame.shape[0] * 640 / frame.shape[1]))),
-                    )
-                    ok, jpeg = cv2.imencode(
-                        ".jpg", thumb, [cv2.IMWRITE_JPEG_QUALITY, 75]
-                    )
-                    if ok:
-                        with self._preview_lock:
-                            self._jpeg = jpeg.tobytes()
-                    last_preview = tick
+                self.metrics.record("shared_publish", time.perf_counter() - started)
+                self.encoder.submit(frame)
+                self.metrics.record("processing", time.monotonic() - tick)
                 self.state.update(
                     tracked_people_count=len(people),
                     people=[
@@ -246,6 +259,11 @@ class Runtime:
                     frames = 0
                     last_stats = tick
                     self.state.update(fps=round(fps, 1))
+                    self.state.update(
+                        renderer_timings=self.metrics.snapshot(),
+                        preview_dropped=self.encoder.dropped,
+                        preview_error=self.encoder.error,
+                    )
                     if (
                         fresh
                         and 0 < fps < self.config.low_fps_threshold

@@ -1,0 +1,127 @@
+{
+  "kind": "synthetic CPU; SDL dummy; not GPU/camera/projector acceptance",
+  "camera": [
+    640,
+    480
+  ],
+  "output": [
+    1920,
+    1080
+  ],
+  "poses": 4,
+  "target_fps": 30,
+  "cases": {
+    "normal": {
+      "fps": 18.3,
+      "people": 4,
+      "frame_age_ms": 53.2,
+      "synthetic_generation_last_ms": 35.2059430006193,
+      "timings": {
+        "capture_poll": {
+          "samples": 128,
+          "median_ms": 35.816,
+          "p95_ms": 36.524
+        },
+        "capture_age": {
+          "samples": 128,
+          "median_ms": 0.0,
+          "p95_ms": 0.0
+        },
+        "frame_copy": {
+          "samples": 128,
+          "median_ms": 0.14,
+          "p95_ms": 0.154
+        },
+        "inference": {
+          "samples": 128,
+          "median_ms": 0.019,
+          "p95_ms": 0.021
+        },
+        "composition_and_control": {
+          "samples": 128,
+          "median_ms": 16.684,
+          "p95_ms": 17.166
+        },
+        "shared_publish": {
+          "samples": 128,
+          "median_ms": 1.137,
+          "p95_ms": 1.299
+        },
+        "processing": {
+          "samples": 128,
+          "median_ms": 54.349,
+          "p95_ms": 55.356
+        },
+        "preview_encode": {
+          "samples": 57,
+          "median_ms": 2.095,
+          "p95_ms": 2.636
+        },
+        "presentation": {
+          "samples": 7,
+          "median_ms": 29.386,
+          "p95_ms": 29.837
+        }
+      },
+      "preview_dropped": 89,
+      "runtime_error": null,
+      "projector_driver": "dummy"
+    },
+    "all_effects_all_cues": {
+      "fps": 4.9,
+      "people": 4,
+      "frame_age_ms": 209.2,
+      "synthetic_generation_last_ms": 36.29591700155288,
+      "timings": {
+        "composition_and_control": {
+          "samples": 33,
+          "median_ms": 172.2,
+          "p95_ms": 190.159
+        },
+        "shared_publish": {
+          "samples": 33,
+          "median_ms": 1.127,
+          "p95_ms": 1.277
+        },
+        "processing": {
+          "samples": 33,
+          "median_ms": 209.864,
+          "p95_ms": 229.517
+        },
+        "preview_encode": {
+          "samples": 33,
+          "median_ms": 2.232,
+          "p95_ms": 3.634
+        },
+        "capture_poll": {
+          "samples": 33,
+          "median_ms": 35.658,
+          "p95_ms": 36.774
+        },
+        "capture_age": {
+          "samples": 33,
+          "median_ms": 0.0,
+          "p95_ms": 0.0
+        },
+        "frame_copy": {
+          "samples": 33,
+          "median_ms": 0.141,
+          "p95_ms": 0.153
+        },
+        "inference": {
+          "samples": 33,
+          "median_ms": 0.019,
+          "p95_ms": 0.024
+        },
+        "presentation": {
+          "samples": 7,
+          "median_ms": 29.164,
+          "p95_ms": 33.747
+        }
+      },
+      "preview_dropped": 89,
+      "runtime_error": null,
+      "projector_driver": "dummy"
+    }
+  }
+}

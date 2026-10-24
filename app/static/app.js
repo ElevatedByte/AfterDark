@@ -67,7 +67,9 @@ function render(s) {
   for(const [key,value] of Object.entries(s.effect_settings)) {
     if(document.activeElement!==$(key) && !sliderTimers[key]) {$(key).value=value;$(key+'-value').textContent=Math.round(value*100)+'%';}
   }
-  const errors=[s.runtime_error,s.camera_error,s.tracking_error,s.projector_error].filter(Boolean);
+  const timing=s.renderer_timings?.composition_and_control;
+  $('renderer-state').textContent='Renderer: '+(s.renderer_backend || 'cpu').toUpperCase()+(timing?' · composition '+timing.median_ms+' ms median / '+timing.p95_ms+' ms p95':'');
+  const errors=[s.preview_error,s.runtime_error,s.camera_error,s.tracking_error,s.projector_error].filter(Boolean);
   if(s.resolution_reduced) errors.push('Processing reduced to 640 × 480 to improve frame rate.');
   $('errors').hidden=!errors.length;$('errors').textContent=errors.join(' · ');
   $('tracker-state').textContent='Tracking: '+s.tracking_status+(s.last_gesture?' · '+s.last_gesture:'');

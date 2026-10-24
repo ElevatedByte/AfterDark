@@ -69,6 +69,18 @@ class TimedCue(Effect):
         pixels = max(
             1, round(min(h * height, w * 0.85 * asset.shape[0] / asset.shape[1]))
         )
+        if hasattr(frame, "sprite"):
+            frame.sprite(
+                asset,
+                x * w,
+                y * h,
+                max(1, round(asset.shape[1] * pixels / asset.shape[0])),
+                pixels,
+                angle=angle,
+                alpha=self.opacity * alpha,
+                flip=flip,
+            )
+            return
         cache_key = (key, pixels, flip)
         if cache_key not in self._scaled:
             sw = max(1, round(asset.shape[1] * pixels / asset.shape[0]))
