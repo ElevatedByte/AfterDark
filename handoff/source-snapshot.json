@@ -1,0 +1,674 @@
+{
+  "source_path": "/home/kitchen/ai-projects/interactive-halloween",
+  "snapshot_date": "2026-10-24",
+  "files": [
+    {
+      "path": ".env.example",
+      "size_bytes": 537,
+      "sha256": "b616465f7999914714c21c82449b0be51dbbf55406e38956a2a4d6f71a8825df"
+    },
+    {
+      "path": ".gitignore",
+      "size_bytes": 103,
+      "sha256": "69b2aebc5e467dcb2ea73441ddd43075b02fc9d3dfdc27bf5f74658b455e23c2"
+    },
+    {
+      "path": "README.md",
+      "size_bytes": 33726,
+      "sha256": "d60c2e73f7ce37fb23e4d956264b56d8ecbcb6b704cf3e3c87fd528a1d2d3f18"
+    },
+    {
+      "path": "VERIFICATION.md",
+      "size_bytes": 18072,
+      "sha256": "7aa9639dc7b8fe70cf0e3f03f0b689ae66e7299b7142b2d43e7e56b4c1de0ebc"
+    },
+    {
+      "path": "app/__init__.py",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app/api/__init__.py",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app/api/control.py",
+      "size_bytes": 1623,
+      "sha256": "12b0e24881ca76c8b41984abd6d7de3e698b75a795ccd89be4139be8a84ca8ef"
+    },
+    {
+      "path": "app/api/routes.py",
+      "size_bytes": 3336,
+      "sha256": "3d4f0c2ccd2dc5a84a2d43830253a0dfbab5c09a63c74f57fa983973cae82060"
+    },
+    {
+      "path": "app/api/websocket.py",
+      "size_bytes": 1986,
+      "sha256": "3002765c6bac9f95fcb7704accf1478bc30f4b8df2504755280de5967a796205"
+    },
+    {
+      "path": "app/assets/README.md",
+      "size_bytes": 1474,
+      "sha256": "3e2c37eb7d6ae3b6d993525901eddd92edd47e3e0152a2c36815f33114fc422f"
+    },
+    {
+      "path": "app/assets/backgrounds/haunted-house-standby-prompt.txt",
+      "size_bytes": 1850,
+      "sha256": "3d2c638bb80cb745c1d7afcc53b7e8ec0b5072f7a6ab36d3bdcb1b10904f0218"
+    },
+    {
+      "path": "app/assets/backgrounds/haunted-house-standby.png",
+      "size_bytes": 2751639,
+      "sha256": "1fc51ae6f333c5b447cf88e8d7d4ab0cc2e0254b14c57bae4d4afb5787a4eb1b"
+    },
+    {
+      "path": "app/assets/bats/.gitkeep",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app/assets/models/.gitkeep",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app/assets/models/pose_landmarker_lite.task",
+      "size_bytes": 5777746,
+      "sha256": "59929e1d1ee95287735ddd833b19cf4ac46d29bc7afddbbf6753c459690d574a"
+    },
+    {
+      "path": "app/assets/overlays/details.png",
+      "size_bytes": 2308697,
+      "sha256": "e1e305e0e7067004e3245343d2fbaf36d62a66d42ad0ab10038ff0aa00cc8d8b"
+    },
+    {
+      "path": "app/assets/overlays/generation-prompts.txt",
+      "size_bytes": 6108,
+      "sha256": "eebdea7702056958576d4ca4cd413236db2b374d356257c5fc6963af3ed09199"
+    },
+    {
+      "path": "app/assets/overlays/heads.png",
+      "size_bytes": 2795012,
+      "sha256": "7233fe8707f9830e9e0110d282c107548f9d7dde79be55c67757420df4f1bec1"
+    },
+    {
+      "path": "app/assets/overlays/visitors-blink.png",
+      "size_bytes": 2323279,
+      "sha256": "f740122671adb9808bb4c084b92378a671149b1b7bd929327887464ce6aff336"
+    },
+    {
+      "path": "app/assets/overlays/visitors.png",
+      "size_bytes": 2375151,
+      "sha256": "e3eb42ab1fcf20371ab0fc7a52c3afb350a10de7953e4532c6eab025d63296df"
+    },
+    {
+      "path": "app/assets/pumpkins/.gitkeep",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app/assets/sounds/.gitkeep",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app/audio/__init__.py",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app/audio/sound_manager.py",
+      "size_bytes": 1128,
+      "sha256": "b0d57cd384efcce9c466beb1bd30d161b531d3c31bc2922d06031afc3fe38933"
+    },
+    {
+      "path": "app/camera/__init__.py",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app/camera/camera_manager.py",
+      "size_bytes": 4123,
+      "sha256": "486e801cbd2b367ae7de489364362eb2db1b50c98daf3f17179bb6ec23b64751"
+    },
+    {
+      "path": "app/camera/demo.py",
+      "size_bytes": 4891,
+      "sha256": "3d789808df5353e7449a7b08199dd1875efec8c66073104966bd705dbf63f7a2"
+    },
+    {
+      "path": "app/config.py",
+      "size_bytes": 1713,
+      "sha256": "7deec683e4bfc511182ff3b7d31c00e65397c1671b608bd5d910fccb35fde2f2"
+    },
+    {
+      "path": "app/cues/__init__.py",
+      "size_bytes": 72,
+      "sha256": "253361d011c6be2ccbf9c2de29bf6d2dc75b703f93fd3f4841d8add51ffcbd27"
+    },
+    {
+      "path": "app/cues/animations.py",
+      "size_bytes": 5247,
+      "sha256": "5a00777a092b4e7ae47ccdc117090970c24b99be6281e98904d99a400d5f0a60"
+    },
+    {
+      "path": "app/cues/art.py",
+      "size_bytes": 9643,
+      "sha256": "3b92619182f66cda54a6c26533934e6da58f200aa1be77161b85347db6be7a77"
+    },
+    {
+      "path": "app/cues/base.py",
+      "size_bytes": 3465,
+      "sha256": "560c8dd5b9f7462c3cb1e810b6f58531cdce6bd5ecb331f1df8382c9dbdd0c2e"
+    },
+    {
+      "path": "app/cues/catalog.py",
+      "size_bytes": 1433,
+      "sha256": "f2ecbeb54285c07834e0bd16f9c2a838f32c17796ecea64e04b96fa7d531a23a"
+    },
+    {
+      "path": "app/effects/__init__.py",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app/effects/base.py",
+      "size_bytes": 833,
+      "sha256": "81d36e1a99ef32d93edd85fdc3133e036b1e205410826805df21ca2410616cf2"
+    },
+    {
+      "path": "app/effects/bats.py",
+      "size_bytes": 3522,
+      "sha256": "f837f7091cb2afd6f08cc64484d0e656d04441d864f770f8b94657041b35af23"
+    },
+    {
+      "path": "app/effects/character_art.py",
+      "size_bytes": 1056,
+      "sha256": "a174d8c6cdd8b53528028689c3b25322ce375fe067dfc2f98f9ac045a4b633af"
+    },
+    {
+      "path": "app/effects/frankenstein.py",
+      "size_bytes": 2466,
+      "sha256": "7b52d68b8213853db1d5026d879962d0bc22ee096321cd0a61730f08eea02bd4"
+    },
+    {
+      "path": "app/effects/ghost.py",
+      "size_bytes": 5922,
+      "sha256": "1de2bc5430dc5700fbf008634f8a4545dc11e6c3137c986b2f18f80980f2fe86"
+    },
+    {
+      "path": "app/effects/head_overlay.py",
+      "size_bytes": 3381,
+      "sha256": "af7430d50e18fb55f7be62a52832613406904f1b536b6777809b9068d7860e66"
+    },
+    {
+      "path": "app/effects/lightning.py",
+      "size_bytes": 3045,
+      "sha256": "54406e7befb16bc8b42f3d575ef575b69f9aaf584b0175f5e7c7cab19a1103c9"
+    },
+    {
+      "path": "app/effects/magic.py",
+      "size_bytes": 2139,
+      "sha256": "6d772eb83fa1227cd723598cc6b14ba6e8224e7a60e33770652f34f75a51c638"
+    },
+    {
+      "path": "app/effects/manager.py",
+      "size_bytes": 3247,
+      "sha256": "2798b56a9c87507c7f553bbcc50ae8f5656288ce3529ee3dc69f67795ad71049"
+    },
+    {
+      "path": "app/effects/mummy.py",
+      "size_bytes": 2693,
+      "sha256": "20f2145951c4af6d45396c6c91eae00a19dcf24929a720f0262b343f0cb50517"
+    },
+    {
+      "path": "app/effects/particles.py",
+      "size_bytes": 2871,
+      "sha256": "cef2ae2dcebd73b6f2987f953c087973e6744560aeb5084c6e7373c63ac2b6bb"
+    },
+    {
+      "path": "app/effects/pumpkin_head.py",
+      "size_bytes": 1523,
+      "sha256": "cc884971675a1f74440af3571da7c5901614cffd6a91be43509d495934b9aa42"
+    },
+    {
+      "path": "app/effects/skeleton.py",
+      "size_bytes": 5049,
+      "sha256": "b7134581e7c38c0cc685454b809645f6c4c711b96ab05c95cef801d2502d13c4"
+    },
+    {
+      "path": "app/effects/vampire.py",
+      "size_bytes": 2846,
+      "sha256": "734374c244b37d0915ebf7f80f89ed9f03c4913e1ae35ef9061000983a562cce"
+    },
+    {
+      "path": "app/effects/witch.py",
+      "size_bytes": 2155,
+      "sha256": "90989e2dd12d540c5859fde97cbf238243285cd11006180e96b2d87f0693ee8e"
+    },
+    {
+      "path": "app/main.py",
+      "size_bytes": 3026,
+      "sha256": "1c48a577549d5fdbd36e6f5450c2b38ba4874f5e22c086ae128915b195ef3065"
+    },
+    {
+      "path": "app/renderer/__init__.py",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app/renderer/compositor.py",
+      "size_bytes": 4671,
+      "sha256": "d236ce8b3398c1e1ef26063243b7b7676b165143c4bde7c02e6b08f850970efc"
+    },
+    {
+      "path": "app/renderer/projector.py",
+      "size_bytes": 6646,
+      "sha256": "79b9d3b4abbcc0dbe9f0198b357947ff1d761201347d4ab84bc79c40e96a5040"
+    },
+    {
+      "path": "app/renderer/sprites.py",
+      "size_bytes": 2683,
+      "sha256": "d595a7bebeef31f44f23d4c2c05a0f36502c27d31edf54bbe01f0e2a19ab6d96"
+    },
+    {
+      "path": "app/runtime.py",
+      "size_bytes": 14270,
+      "sha256": "a03815bc8355c5abe4378d504298a9f4ee78cdf90194e61f6a21fa2d972e6b6c"
+    },
+    {
+      "path": "app/state/__init__.py",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app/state/app_state.py",
+      "size_bytes": 6860,
+      "sha256": "c251991c2a2b4af7b58cad69010867514b51a0ef56bbd6f094f05e3e8e82be83"
+    },
+    {
+      "path": "app/static/app.js",
+      "size_bytes": 8620,
+      "sha256": "84b79cc8f1c22354d5fa58e4efb5e0e6340002ec9ce6cfb94d8aaeefc38eba65"
+    },
+    {
+      "path": "app/static/index.html",
+      "size_bytes": 6867,
+      "sha256": "48d7186654ab87c4a0594e33b62cc6ae86b9f5768dec6eb37d718047b4bbf401"
+    },
+    {
+      "path": "app/static/styles.css",
+      "size_bytes": 10280,
+      "sha256": "3a9833728b7bcb74910fdbcfb753218c2524b9e47416863f00f6e62cd95124fd"
+    },
+    {
+      "path": "app/tracking/__init__.py",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app/tracking/gesture_detector.py",
+      "size_bytes": 5080,
+      "sha256": "00d0a42c7abe26a1b71e77c309d3ae526aab152574cbf9f29c8e4fca63564c51"
+    },
+    {
+      "path": "app/tracking/models.py",
+      "size_bytes": 3944,
+      "sha256": "5ec610179de52c83b635d4b27b7fef3c5d0baaf3de8a90831683a858794b0e80"
+    },
+    {
+      "path": "app/tracking/person_tracker.py",
+      "size_bytes": 4349,
+      "sha256": "723758c873677e3d85c4f954aa3bfd6ab335f23d97f0621458f7f8cb6da2768c"
+    },
+    {
+      "path": "app/tracking/pose_tracker.py",
+      "size_bytes": 1949,
+      "sha256": "baf02c651d7b04dcf7f81c587a820532cb0bde72f486b9a8df2cbfcf87ae9006"
+    },
+    {
+      "path": "artifacts/.gitkeep",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/character-overlays.jpg",
+      "size_bytes": 77016,
+      "sha256": "7bf0cd23b40d18e398bd6ea90ba0f3c39cf4d7325b257bb9ff69612c60ca7b62"
+    },
+    {
+      "path": "artifacts/character-update-before.json",
+      "size_bytes": 1097,
+      "sha256": "b02ca17b757593b229ce16e0b504daca3dcd6b02074c1994ecf1e7780e90aabc"
+    },
+    {
+      "path": "artifacts/character-update-live.json",
+      "size_bytes": 1066,
+      "sha256": "9f471bd708defa26f21b1e525b432703c2bb83cb83c9cf65e03566b7d44c3392"
+    },
+    {
+      "path": "artifacts/hardware-dummy.json",
+      "size_bytes": 407,
+      "sha256": "649080ae7827b9df506e286f4e3359503dc730c1d4ff29c91cadf562cbb4e3d9"
+    },
+    {
+      "path": "artifacts/hardware-real.json",
+      "size_bytes": 407,
+      "sha256": "b4049188e27680f33e62cc587c1f709483fa2a5c407da3c235f30bc8ba8d0fc1"
+    },
+    {
+      "path": "artifacts/haunted-house-live-preview.jpg",
+      "size_bytes": 63389,
+      "sha256": "77eb29e04d42ebb3749ce032329d1536e94e535f166795cd23cbdf572cdf17bf"
+    },
+    {
+      "path": "artifacts/haunted-house-reconnecting.jpg",
+      "size_bytes": 190351,
+      "sha256": "f80f5a48d43a2ef37fadade2ceb4483be271c52933ffcfe00c1a91345f031b92"
+    },
+    {
+      "path": "artifacts/haunted-house-standby-4x3.jpg",
+      "size_bytes": 189408,
+      "sha256": "bc7e727d825f84f67de006cd603a8d9f6fa8699e6438bd4a454990ddbd6a764f"
+    },
+    {
+      "path": "artifacts/hd/bats.jpg",
+      "size_bytes": 63883,
+      "sha256": "51d51184780be192bfc9d8d5e48753e3888d3b82aeb9afc5a7b544c0d80b8406"
+    },
+    {
+      "path": "artifacts/hd/black_cat.jpg",
+      "size_bytes": 953321,
+      "sha256": "4ce6ba707555ce66e3c6374d70268dd6a9259efd5949cecbfca0af4d8d2837b0"
+    },
+    {
+      "path": "artifacts/hd/frankenstein.jpg",
+      "size_bytes": 117224,
+      "sha256": "32d399551f93ecafec7b50bfdc66a9eb13c7046279e68460a46e38c4301bd4af"
+    },
+    {
+      "path": "artifacts/hd/ghost.jpg",
+      "size_bytes": 59423,
+      "sha256": "9dc08a91989be4e04eada5ab7a1983c66e3a3da75bceb56e764494f97c3e1418"
+    },
+    {
+      "path": "artifacts/hd/ghost_parade.jpg",
+      "size_bytes": 949746,
+      "sha256": "5d4ea470882310b63111e5c713e18b8e631b87a5aab6105e1b89fd9c170cf790"
+    },
+    {
+      "path": "artifacts/hd/lightning.jpg",
+      "size_bytes": 109232,
+      "sha256": "0384c2396b3cfaef770e89c63304c89c81b7800970998e3b3dcbc3fa10af8ebe"
+    },
+    {
+      "path": "artifacts/hd/magic.jpg",
+      "size_bytes": 40331,
+      "sha256": "5023815f08871c591b30a6fd0efe67b88193274303fd040d8f0ef14a8f1a0874"
+    },
+    {
+      "path": "artifacts/hd/mummy.jpg",
+      "size_bytes": 127353,
+      "sha256": "e38ebed425989ce6f1d2aba37d81b9cd3752baa440fdf2922a0d570f3c5dc0e5"
+    },
+    {
+      "path": "artifacts/hd/pumpkin_head.jpg",
+      "size_bytes": 116680,
+      "sha256": "94cad62f19362d51fdf826cb306821f835eea02e95757f9b2c2c6378c8b719a9"
+    },
+    {
+      "path": "artifacts/hd/pumpkin_roll.jpg",
+      "size_bytes": 970508,
+      "sha256": "37a3b304263ec77052174bb06da9593f3e895ed2255a57c9365efecc83766ffe"
+    },
+    {
+      "path": "artifacts/hd/skeleton.jpg",
+      "size_bytes": 164247,
+      "sha256": "cdfbe1eb663f6d24307c054480c92e548bcbd8ddf7d91669e1bde33a026beb20"
+    },
+    {
+      "path": "artifacts/hd/skeleton_peek.jpg",
+      "size_bytes": 979220,
+      "sha256": "751bfc595216ed4ee9616078ee7fe98756e6340df0d681bba091d7aa43bc9f21"
+    },
+    {
+      "path": "artifacts/hd/spider_drop.jpg",
+      "size_bytes": 969155,
+      "sha256": "4d417875bc67ff50b0ebcfdc5a551c472cdb76a01d146666bcadda64f0fda076"
+    },
+    {
+      "path": "artifacts/hd/vampire.jpg",
+      "size_bytes": 110149,
+      "sha256": "94a0680238c06f0d8a4fbb297693d215a5cb45f840bc38b28d51d6ad06c5149f"
+    },
+    {
+      "path": "artifacts/hd/witch.jpg",
+      "size_bytes": 129016,
+      "sha256": "c0149ed2c1fb5f0df1983ae96b46ea45a52dcfc3a2d048e15d2510dbeac5aae7"
+    },
+    {
+      "path": "artifacts/hd/witch_flyby.jpg",
+      "size_bytes": 963274,
+      "sha256": "684f5f40a97ead3dff217eb8bb3500ab4e8b93bcbb8a3da7de3e5b753370ddfa"
+    },
+    {
+      "path": "artifacts/hd/zombie_hands.jpg",
+      "size_bytes": 984051,
+      "sha256": "d28fa9d8986dc021a8eb488933cd607e5473e2c356bede71850aab4e00310eed"
+    },
+    {
+      "path": "artifacts/hd-live-output.jpg",
+      "size_bytes": 782683,
+      "sha256": "d6fad4cd1bdc149179ef23d2a9e25ad54dba77d4f148518409a5be5b68209ddb"
+    },
+    {
+      "path": "artifacts/hd-live-visitors.jpg",
+      "size_bytes": 780897,
+      "sha256": "d66ec487874abd5709a1a4382ece00deeb6b06255f1c2cc76ec85bf07537f756"
+    },
+    {
+      "path": "artifacts/hd-overlays-preview.jpg",
+      "size_bytes": 277498,
+      "sha256": "9d2263831e5033ec266849b906f8021e0a37abf2db89ec63032702745059a481"
+    },
+    {
+      "path": "artifacts/hd-render-performance.json",
+      "size_bytes": 549,
+      "sha256": "5b28841bf3b054f99943b98b0b8898e6601ead2eff58bc8e16c2fd3662200172"
+    },
+    {
+      "path": "artifacts/hd-update-after.json",
+      "size_bytes": 2401,
+      "sha256": "e8eac3c46c60cf1f79b2000ea1e001800df7e68b847b2d2d190e55a77623836b"
+    },
+    {
+      "path": "artifacts/hd-update-before.json",
+      "size_bytes": 2402,
+      "sha256": "50a0b605ce41cdd8ff4b10cf04d8785539304b94b213adab887174be7e3ed2ab"
+    },
+    {
+      "path": "artifacts/live-cues-after.json",
+      "size_bytes": 2397,
+      "sha256": "0d89b4a213a16333a1a9ba290e91c72c3e7f1275c430cd1edb11a30444b2ede4"
+    },
+    {
+      "path": "artifacts/live-cues-before.json",
+      "size_bytes": 1071,
+      "sha256": "5b874ad7dfc0722f86e6a7f7037c38e821332807d000e6efe5117fc50f20fc69"
+    },
+    {
+      "path": "artifacts/live-cues-preview.jpg",
+      "size_bytes": 97215,
+      "sha256": "9e1f0e9cfd7869aa1ed103637b4bc64b9d64dbdfb8c9dbfc0aac7e840b96f305"
+    },
+    {
+      "path": "artifacts/live-cues-preview.mp4",
+      "size_bytes": 886046,
+      "sha256": "f6c387f72c4126cf83c29b6fbacce53988da63f8531c7d821ed5d0b08f3eed91"
+    },
+    {
+      "path": "artifacts/pose-reference.jpg",
+      "size_bytes": 44100,
+      "sha256": "c8a830ed683c0276d713dd5aeda28f415f10cd6291972084a40d0d8b934ed62b"
+    },
+    {
+      "path": "artifacts/random-person-effects-live.json",
+      "size_bytes": 1066,
+      "sha256": "a78847cdd3d021062c4aeff3778ec940d154bd548f69116ca8f034b61497dfbc"
+    },
+    {
+      "path": "artifacts/real-runtime-status.json",
+      "size_bytes": 880,
+      "sha256": "d689c2a879a47f2771f6e84ebbdb8128658618fe433bf178b47c17331bf70d12"
+    },
+    {
+      "path": "artifacts/relocation.json",
+      "size_bytes": 273,
+      "sha256": "4af79b2a98da9756de56ae47915afa9c4bc2b280b0e8fe116059c07612e24f22"
+    },
+    {
+      "path": "artifacts/smoke-test.json",
+      "size_bytes": 830,
+      "sha256": "ffe75e94a71e54cb12716ab3797d3331903ac609ca6c24c912eef60314ca8255"
+    },
+    {
+      "path": "artifacts/standby-update-after.json",
+      "size_bytes": 2397,
+      "sha256": "bdc14b0a60b7de407556798aefb3399a5e13c6a2afd9d1b2320fd58d41f41ebc"
+    },
+    {
+      "path": "artifacts/standby-update-before.json",
+      "size_bytes": 2405,
+      "sha256": "40a2ed1116d75b809cb11f7a2b1c63a1eaecaf817a2a4579752564dd28ae785f"
+    },
+    {
+      "path": "artifacts/tracking-probe.json",
+      "size_bytes": 253,
+      "sha256": "1069cce2e6118e1c01d3f586650f6e8775dc4e25bd289b64c91d23accca41490"
+    },
+    {
+      "path": "pytest.ini",
+      "size_bytes": 55,
+      "sha256": "eb06fd6a11670a8364a4babe3059d7a64d262ea03ae2be2e3cfe5ea6f7ce000d"
+    },
+    {
+      "path": "requirements-dev.txt",
+      "size_bytes": 62,
+      "sha256": "8c6249e547c8ce54d7601a259eb235e4d5863d7be9692bde5054d690d753a52b"
+    },
+    {
+      "path": "requirements.txt",
+      "size_bytes": 135,
+      "sha256": "70588cdce53dff954095a3fa5eadc1a448b2346fba661362920178b0bb5f52f8"
+    },
+    {
+      "path": "run.sh",
+      "size_bytes": 1516,
+      "sha256": "cd42b4ba18e4edde3c28e510bc5121efa593bcb69449ff91259ba5cd6abc15d8"
+    },
+    {
+      "path": "scripts/check_dependencies.py",
+      "size_bytes": 636,
+      "sha256": "9b7627512945ce7906e914ac8e023756a492cea016f53a291a35600daed1fba5"
+    },
+    {
+      "path": "scripts/download_model.py",
+      "size_bytes": 1471,
+      "sha256": "a5bb613e33c6f95cba9000336106d1521b20d634f20c3abf411124f654c684bf"
+    },
+    {
+      "path": "scripts/probe_hardware.py",
+      "size_bytes": 2374,
+      "sha256": "7c755163faa14d3f09db278966cadcb66888318cf5f420ea2001249d2400bbf7"
+    },
+    {
+      "path": "scripts/probe_tracking.py",
+      "size_bytes": 1624,
+      "sha256": "e2ca8eb58accd14082e787e9b0c6051be490cccb55e2ced9d2056f23e60e4b16"
+    },
+    {
+      "path": "scripts/render_cue_previews.py",
+      "size_bytes": 2974,
+      "sha256": "175a283e88659201560b3d8c8b08c9475bdd31bc6bf62c2c34bf8cecbf2987b9"
+    },
+    {
+      "path": "scripts/render_hd_previews.py",
+      "size_bytes": 7059,
+      "sha256": "b9a4f3099f546ec51e5a7740503b004b05306519b16185ba9c48fbb1e10a4c6f"
+    },
+    {
+      "path": "scripts/smoke_test.py",
+      "size_bytes": 12381,
+      "sha256": "8b95f6d41dd95f670a4c903422c78a19a5b884e8da3e0a11e5838845ff37bf2d"
+    },
+    {
+      "path": "tests/conftest.py",
+      "size_bytes": 1059,
+      "sha256": "1811da9fe3016ab18baaaa955050d40deac2687f20c60dcbad38b433f22b1c7c"
+    },
+    {
+      "path": "tests/test_camera.py",
+      "size_bytes": 2635,
+      "sha256": "4d651d98db109cd09185c935f3801e81defb7ee70578fe1dfd7e8c4423fcbc7b"
+    },
+    {
+      "path": "tests/test_characters.py",
+      "size_bytes": 5180,
+      "sha256": "1d5d5f0aabf642ac362c2aa4e54d258dafd851d2d41f196a3becf4727fc125d8"
+    },
+    {
+      "path": "tests/test_effects.py",
+      "size_bytes": 4168,
+      "sha256": "8389bd4e8e6a97d415ec40d61ab9a134f83bf08e05c01ed3720f17a60aaf3ab2"
+    },
+    {
+      "path": "tests/test_gestures.py",
+      "size_bytes": 2175,
+      "sha256": "a9e71b1bdd8c3e4b9cc8b67d42e191405922fbd256ef8bc28ff447b538508439"
+    },
+    {
+      "path": "tests/test_hd_rendering.py",
+      "size_bytes": 4442,
+      "sha256": "b6e007114ed13d137eb4d5c6cafd81b47bce57ff6e3cc75700bac61a6a1ba8c6"
+    },
+    {
+      "path": "tests/test_live_cues.py",
+      "size_bytes": 4795,
+      "sha256": "53638d4e60465f26901d3429f7ed92b3c19629882eb1c8d9de9b37461a436bc6"
+    },
+    {
+      "path": "tests/test_person_defaults.py",
+      "size_bytes": 6345,
+      "sha256": "3cdda84015926a852684551a499a046e39fab8c5a389da055ad3f1f6114801f2"
+    },
+    {
+      "path": "tests/test_state_api.py",
+      "size_bytes": 4824,
+      "sha256": "8a3f77ea25502cc48fa8b9f603a2853e9b37ba2831adaa23fdfda4cdc66d350c"
+    },
+    {
+      "path": "tests/test_tracking.py",
+      "size_bytes": 2240,
+      "sha256": "f659dab3bbbf459d4f6f89abc833ee32e9974f94f7db3fbe844a2c9c905f953f"
+    }
+  ],
+  "excluded": [
+    ".pytest_cache",
+    ".ruff_cache",
+    ".venv",
+    "app/__pycache__",
+    "app/api/__pycache__",
+    "app/audio/__pycache__",
+    "app/camera/__pycache__",
+    "app/cues/__pycache__",
+    "app/effects/__pycache__",
+    "app/renderer/__pycache__",
+    "app/state/__pycache__",
+    "app/tracking/__pycache__",
+    "artifacts/smoke-server.log",
+    "scripts/__pycache__",
+    "tests/__pycache__"
+  ],
+  "note": "Source files are copied without changes. No original Git repository is present."
+}

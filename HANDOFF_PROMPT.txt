@@ -1,0 +1,73 @@
+You are helping me continue my Afterdark / Halloween Projector project on a new computer.
+
+The extracted folder containing this file is the project root. Read AGENTS.md,
+START_HERE.md, handoff/PROJECT_CONTEXT.md, handoff/PORTABILITY.md,
+handoff/GPU_MIGRATION.md, and handoff/PACKAGE_VERIFICATION.md. Then inspect the
+actual source. README.md and VERIFICATION.md are the original project documents;
+their paths, services, machine details, and test results describe the old computer.
+Do not assume that a service or environment from that computer exists here.
+
+My goals:
+1. Get this project installed and running on this computer.
+2. Move the primary graphics/rendering engine onto the GPU, potentially into a
+   compiled native service or process.
+3. Keep the website as the control plane for graphics, effects, scenes, people,
+   cues, and settings. The browser may show a throttled preview, but must not be
+   required to render or keep the projector/show alive.
+
+Begin by inspecting this computer's OS, architecture, GPU(s), driver/backend
+availability, Python, native toolchains, camera access, and displays. Ask only
+for information you cannot determine, such as which physical projector I intend
+to use. The destination is Linux; the distribution and GPU were not specified
+when the package was made.
+
+Verify the archive contents using handoff/SHA256SUMS.json before changing files.
+Use a fresh virtual environment in this extracted folder, starting with Python
+3.11, the tested baseline. Install the dependencies in requirements-dev.txt using
+setup_project.py --dev or the equivalent commands in START_HERE.md. Install any
+needed native system packages using the correct method for this computer and
+honor normal machine permissions. This ZIP includes the pose model and artwork,
+but does not include Python, drivers, package wheels, or the old virtual environment.
+There is no Node build step and the application does not need an OpenAI API key.
+
+First run the unit tests and synthetic demo/smoke test. Report failures honestly,
+including environment restrictions. Keep synthetic checks separate from real
+camera, GPU, and physical projector validation. Fix only the portability issues
+needed to establish the baseline. In particular, real camera capture and the
+hardware probe currently force Linux cv2.CAP_V4L2. On Windows/macOS implement a
+platform-appropriate capture adapter and update diagnostics. Do not claim that
+the existing Python code is already cross-platform or GPU-accelerated.
+
+Once the baseline works, write a short implementation plan based on the actual
+hardware and begin the GPU migration incrementally. Keep a recoverable baseline.
+Measure current frame time and identify capture, inference, composition, preview,
+and presentation costs separately. Choose an appropriate native GPU stack for
+this machine; a compiled service is a preference to evaluate, not an already
+chosen language/framework. Merely packaging Python as an executable or using a
+GPU window to present CPU-composited frames does not meet the rendering goal.
+GPU pose inference is a separate decision from GPU graphics rendering.
+
+Preserve the existing show behavior and artwork: five scenes, ten effects, seven
+animated visitor cues, manual triggers, gesture cooldowns, stable tracking IDs,
+random default person effects in Normal Camera, per-person overrides, segmentation
+ghost trails, standby screen, fullscreen/monitor control, and optional sound cues.
+Retain normalized camera-space coordinates and aspect-preserving output. Keep
+camera/tracking and graphics resolution independent. Read the migration document
+for the proposed process boundary, IPC requirements, and acceptance checks.
+
+Move composition, sprite transforms/blending, particle drawing, ghost history,
+lighting and output presentation onto the GPU in stages. Keep frame queues bounded
+and prefer the newest frame. Do not stream full-resolution raw frames through
+HTTP/JSON or stall the renderer for browser preview encoding. Preserve the current
+HTTP/WebSocket semantics where practical. Add renderer health and useful timing
+telemetry. Prove that closing/reopening the controller does not stop the show.
+Run the native renderer in the logged-in graphical session; a service name alone
+does not give a background process permission to display on the projector.
+
+Keep the app local and offline at show time, with local assets and loopback control.
+Do not publish it or expose the unauthenticated control API to the network.
+Document any necessary dependency changes, the chosen GPU stack, build/run/service
+commands, hardware results, remaining limits, and how to roll back. Continue doing
+the implementation work, rather than stopping at an architecture proposal. If the
+chat cannot access local files or run commands on this computer, explain that
+limitation and help me open the extracted folder in a local Codex session first.

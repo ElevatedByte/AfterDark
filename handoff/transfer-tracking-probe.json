@@ -1,0 +1,19 @@
+{
+  "single": {
+    "people": 1,
+    "masks": 1,
+    "landmarks": [
+      15
+    ],
+    "first_inference_ms": 48.9
+  },
+  "two_copies": {
+    "people": 2,
+    "masks": 2,
+    "landmarks": [
+      15,
+      15
+    ],
+    "first_inference_ms": 69.4
+  }
+}

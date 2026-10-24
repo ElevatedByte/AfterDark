@@ -1,0 +1,10 @@
+Generated with the built-in image_gen tool on 2026-09-17.
+Runtime uses the bundled PNG offline.
+
+Use case: illustration-story.
+Asset type: finished fullscreen waiting-screen image for a local Halloween dance projector for children, landscape 16:9, ideally 2048 x 1152.
+Primary request: a festive, welcoming haunted-house background with the exact words "The Dance Floor Awaits".
+Scene: a wonderfully crooked Victorian haunted house at twilight, glowing amber windows, a winding path leading toward the porch, smiling jack-o'-lanterns along the path, a large soft moon, a few little bat silhouettes, curling trees and gentle lavender mist. Whimsical Halloween storybook illustration, rich painterly detail and cinematic warm lighting, magical and fun for kids. Deep indigo and purple night, orange pumpkin lanterns and gold window light. Inviting, not frightening, no gore.
+Composition: a full-bleed illustrated scene, no UI frame. The haunted house is prominent in the upper half; the path and pumpkins frame a calm dark central area for the title. Keep the house and ALL lettering comfortably inside the central 70% of the image width and central 75% of its height so the design can be center-cropped for a 4:3 camera preview as well as displayed at 16:9. Decorative detail may extend to the edges.
+Text (verbatim): "The Dance Floor Awaits". Beautiful, very legible large storybook serif lettering in warm ivory with a subtle golden glow and dark shadow, centered in the lower-middle of the scene. Arrange as two lines: "The Dance Floor" then "Awaits". Make the phrase an integrated, polished part of the illustration, easy to read from across a room, with clear spacing.
+Constraints: only that exact phrase, no other text, no logos, no watermark, no people, no interface elements. Make this a finished colorful Halloween title image, not a mockup.
