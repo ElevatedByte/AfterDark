@@ -17,6 +17,36 @@ PROTOCOL_VERSION = 1
 HEADS = ("pumpkin_head", "witch", "frankenstein", "vampire", "mummy")
 
 
+class SDLContextLoader:
+    """Resolve GL functions through the SDL instance that owns this window.
+
+    This works with GLX or EGL and avoids requiring development-only libGL.so
+    and libEGL.so symlinks on a runtime-only Linux installation.
+    """
+
+    def __init__(self):
+        import ctypes
+        import pygame.base
+
+        self.library = ctypes.CDLL(pygame.base.__file__)
+        self.resolve = self.library.SDL_GL_GetProcAddress
+        self.resolve.argtypes = [ctypes.c_char_p]
+        self.resolve.restype = ctypes.c_void_p
+
+    def load_opengl_function(self, name):
+        return self.resolve(name.encode()) or 0
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        pass
+
+    def release(self):
+        # SDL owns the actual context and releases it in pygame.quit().
+        pass
+
+
 class RenderMailbox:
     """One atomic latest frame + descriptor, BGR8/sRGB/top-left/tightly packed.
 
@@ -152,7 +182,11 @@ def gpu_worker(mailbox, commands, events, settings):
             vsync=0,
         )
         pygame.display.set_caption("Afterdark — experimental GPU rehearsal")
-        context = moderngl.create_context(require=330)
+        loader = SDLContextLoader()
+        moderngl.init_context(loader)
+        context = moderngl.get_context()
+        if context.version_code < 330:
+            raise RuntimeError("OpenGL 3.3 or later is required")
         renderer = GpuRenderer(context, settings["width"], settings["height"])
         effects = {
             effect.name: effect

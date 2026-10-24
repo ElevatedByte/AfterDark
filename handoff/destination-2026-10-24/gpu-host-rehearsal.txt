@@ -1,0 +1,5 @@
+{"protocol_version": 1, "type": "ready", "running": true, "hardware": true, "backend": {"GL_VENDOR": "NVIDIA Corporation", "GL_RENDERER": "NVIDIA GeForce GTX 745/PCIe/SSE2", "GL_VERSION": "3.3.0 NVIDIA 580.178.04"}, "fullscreen": false, "monitor": 0}
+{"protocol_version": 1, "type": "ack", "command_id": 1, "error": null}
+{"protocol_version": 1, "type": "health", "running": true, "sequence": 49, "input_age_ms": 7.8, "stale_input": false, "timings": {"input_copy": {"samples": 32, "median_ms": 0.429, "p95_ms": 0.475}, "composition_submit": {"samples": 32, "median_ms": 1.239, "p95_ms": 7.139}, "presentation": {"samples": 32, "median_ms": 0.248, "p95_ms": 0.292}}, "active_cues": ["witch_flyby"]}
+{"protocol_version": 1, "type": "health", "running": true, "sequence": 73, "input_age_ms": 6.4, "stale_input": false, "timings": {"input_copy": {"samples": 63, "median_ms": 0.433, "p95_ms": 0.49}, "composition_submit": {"samples": 63, "median_ms": 1.241, "p95_ms": 1.646}, "presentation": {"samples": 63, "median_ms": 0.242, "p95_ms": 0.278}}, "active_cues": ["witch_flyby"]}
+pygame-ce 2.5.7 (SDL 2.32.10, Python 3.11.17)

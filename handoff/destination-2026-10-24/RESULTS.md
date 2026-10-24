@@ -49,3 +49,14 @@ acceptance gate. Read `../DESTINATION_SETUP.md` for exact local commands, curren
 feature boundaries, environment limits, optional user-service instructions, and
 rollback. The full CPU show remains primary until the remaining GPU effects,
 controller integration, preview pipeline and physical acceptance are complete.
+
+## Subsequent USB camera and native GPU checks
+
+After the user connected the Galyimage camera, host-level execution became
+available. Camera capture passed at 1280x720; see `usb-camera-check.json`. The
+single inference sample contained zero detections. The native GPU rehearsal then
+passed on NVIDIA GTX 745 / 580.178.04 / OpenGL 3.3. SDL function-pointer loading
+removed the missing development-symlink dependency. A final four-second test
+exited cleanly. See `gpu-host-rehearsal.txt`. Timings are CPU submission and swap
+durations, not GPU elapsed queries or end-to-end physical latency. The HDMI
+projector is still pending; only the current workstation monitor was used.

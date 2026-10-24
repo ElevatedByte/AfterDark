@@ -62,7 +62,28 @@ synthetic/headless checks, not proof of physical webcam, NVIDIA, or projector us
 GPU tests use optional EGL; they explicitly permit software rendering only for
 shader correctness tests and skip when EGL is unavailable.
 
-## Detected host and access limits
+## Updated hardware validation after connecting the USB camera
+
+Host-level execution became available later in this session. The Galyimage Live
+USB camera (Image+, eba4:1303) opened at `/dev/video0` and captured 30 frames at
+1280x720. MediaPipe initialized; the sampled image had zero detected people, so
+real-person tracking remains unverified. No camera images were saved.
+
+Host `nvidia-smi` confirmed GTX 745 / driver 580.178.04. `xrandr` confirmed one
+active HDMI display at 3440x1440. The projector is not connected yet.
+
+The experimental head/cue renderer successfully opened a window on the NVIDIA
+GTX 745, reported hardware OpenGL 3.3, composed the synthetic input, and shut down
+cleanly. A portability fix now obtains OpenGL function pointers from the owning
+SDL runtime; it needs no development-only `libGL.so` symlink. The standalone
+rehearsal still does not constitute full-show or physical projector acceptance.
+The full controller continues to use CPU composition.
+
+The entries below record the earlier sandbox-only probe and are retained to
+explain the difference between execution scopes. They do not override the
+successful host checks above.
+
+## Initial sandbox-only host and access limits
 
 - Ubuntu 26.04.1 LTS, kernel 7.0.0-38-generic, x86-64.
 - Intel Xeon E5-2670, 8 cores / 16 logical CPUs.
@@ -133,8 +154,8 @@ live API/state bridging, GPU preview/snapshot transfer, device-loss recovery, an
 physical monitor/fullscreen acceptance remain to be migrated or validated.
 Unported effects explicitly fail in the experimental process rather than silently
 vanishing. The original full show preserves them all through the CPU renderer.
-The native window path has not passed hardware acceptance and is not enabled in
-the main controller. There is no claim of GPU speedup or 30 FPS acceptance yet.
+The native window path passed a short hardware rehearsal on the current monitor
+after host access became available. It is not enabled in the main controller. There is no claim of GPU speedup or 30 FPS acceptance yet.
 
 OpenGL 3.3 + ModernGL is the first candidate because it reuses the existing SDL
 window lifecycle and permits shader tests without a new native compiler. Vulkan
@@ -164,7 +185,8 @@ it is not measured physical camera-to-photon latency.
 1. Validate hardware renderer, physical camera, extended projector, fullscreen,
    sound, and real tracking in the logged-in session.
 2. Run the GPU rehearsal and collect hardware timings/GPU use. Validate context
-   survival during fullscreen; the GLX failure prevented testing that here.
+   survival during fullscreen on the intended projector; only windowed host output
+   has been tested so far.
 3. Bridge live poses, assignments, scenes, triggers, and desired/actual state into
    the renderer protocol. Preserve existing HTTP/WebSocket semantics.
 4. Port skeleton, particles, ghost masks/history, lighting and debug layers; use

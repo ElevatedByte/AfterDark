@@ -1,0 +1,14 @@
+{
+  "camera_opened": true,
+  "frames_read": 30,
+  "elapsed_seconds": 1.795,
+  "resolution": [
+    1280,
+    720
+  ],
+  "reported_fps": 30.0,
+  "model_initialized": true,
+  "people_detected": 0,
+  "masks": 0,
+  "inference_ms": 54.77
+}
