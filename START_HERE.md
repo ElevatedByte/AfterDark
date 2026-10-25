@@ -76,7 +76,7 @@ bash run.sh
 `bash run.sh` loads `.env` as trusted shell configuration. Direct
 `.venv/bin/python -m app.main` commands only read exported environment variables
 and do **not** load `.env`. Defaults are localhost port 8000, camera 1280×720,
-output 1920×1080, target 30 FPS, max four people, fullscreen, monitor 1.
+output 1920×1080, target 30 FPS, max eight people, fullscreen, monitor 1.
 
 ## What is included
 

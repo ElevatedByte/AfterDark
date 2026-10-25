@@ -15,7 +15,7 @@ class Config(BaseModel):
     output_width: int = Field(1920, ge=320, le=3840)
     output_height: int = Field(1080, ge=240, le=2160)
     projector_monitor: int = Field(1, ge=0, le=15)
-    max_people: int = Field(4, ge=1, le=8)
+    max_people: int = Field(8, ge=1, le=8)
     pose_confidence: float = Field(0.5, ge=0.1, le=1)
     tracking_smoothing: float = Field(0.65, ge=0, le=0.95)
     fullscreen: bool = True

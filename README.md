@@ -186,7 +186,7 @@ All `Config` fields have uppercase environment overrides. Copy `.env.example` to
 | CAMERA_WIDTH / CAMERA_HEIGHT | 1280 / 720 | Camera processing resolution |
 | OUTPUT_WIDTH / OUTPUT_HEIGHT | 1920 / 1080 | Projector output resolution |
 | PROJECTOR_MONITOR | 1 | Zero-based SDL display index |
-| MAX_PEOPLE | 4 | Pose capacity; operator configurable from 1–8 |
+| MAX_PEOPLE | 8 | Pose capacity; operator configurable from 1–8 |
 | POSE_CONFIDENCE | 0.5 | Detection/presence/tracking confidence threshold |
 | TRACKING_SMOOTHING | 0.65 | Landmark history retention; higher means smoother/more lag |
 | FULLSCREEN | true | Initial fullscreen preference |

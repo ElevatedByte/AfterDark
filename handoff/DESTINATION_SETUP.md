@@ -469,3 +469,9 @@ UI layout update: automation settings beneath the visitors now use a native
 HTML details/summary disclosure labeled Automation settings, collapsed by default.
 Click or keyboard activation expands the toggle, timing, and inclusion controls.
 Collapsing the section does not change automation or saved show preferences.
+
+
+Maximum people default changed to 8 in Config, .env, .env.example, and initial
+controller markup. Applied max_people=8 to the running show through /api/settings
+and verified it in work/show-settings.json for future restarts. No service
+restart was needed. This changes capacity, not verified eight-person performance.
