@@ -1,10 +1,10 @@
-"""Seven small timelines. All motion is based on elapsed seconds, not frame count."""
+"""Visitor timelines. All motion is based on elapsed seconds, not frame count."""
 
 import math
 import cv2
 
-from app.cues import art
-from app.cues.base import TimedCue, rise_and_fall
+from app.cues import art, atmosphere_art
+from app.cues.base import TimedCue, ease, rise_and_fall
 from app.effects.pumpkin_head import pumpkin_asset
 from app.renderer.sprites import load_sprite
 
@@ -186,6 +186,83 @@ class BlackCat(TimedCue):
         )
 
 
+class CreepingFog(TimedCue):
+    name = "creeping_fog"
+
+    def create_assets(self):
+        return {"mist": atmosphere_art.fog_bank()}
+
+    def animate(self, frame):
+        fade = rise_and_fall(self.progress, 0.25, 0.70)
+        for i, (x, y, height) in enumerate(
+            ((0.19, 0.90, 0.24), (0.75, 0.93, 0.26), (0.48, 0.84, 0.18))
+        ):
+            drift = 0.11 * math.sin(self.elapsed * 0.35 + i * 2)
+            self.draw(
+                frame,
+                "mist",
+                x + drift,
+                y + 0.012 * math.sin(self.elapsed + i),
+                height,
+                flip=bool(i % 2),
+                alpha=fade * (0.65 if i == 2 else 0.85),
+            )
+
+
+class HauntedEyes(TimedCue):
+    name = "haunted_eyes"
+
+    def create_assets(self):
+        return {"eyes": atmosphere_art.haunted_eyes()}
+
+    def animate(self, frame):
+        for i, (x, y) in enumerate(((0.14, 0.25), (0.84, 0.34), (0.59, 0.14))):
+            local = max(0, self.elapsed - i * 0.38)
+            fade = ease(local / 0.7) * (1 - ease((self.progress - 0.75) / 0.25))
+            blink = max(0, 1 - abs((local % 2.7) - 1.8) / 0.16)
+            self.draw(
+                frame,
+                "eyes",
+                x + 0.008 * math.sin(local * 1.5),
+                y,
+                0.08,
+                alpha=fade,
+                scale_y=1 - 0.94 * blink,
+            )
+
+
+class GhostPortal(TimedCue):
+    name = "ghost_portal"
+
+    def create_assets(self):
+        return {"ring": atmosphere_art.portal_ring(), "ghost": art.ghost()}
+
+    def animate(self, frame):
+        p = self.progress
+        opening = rise_and_fall(p, 0.23, 0.72)
+        self.draw(
+            frame,
+            "ring",
+            0.64,
+            0.60,
+            max(0.01, 0.50 * opening),
+            angle=-self.elapsed * 32,
+            alpha=opening,
+        )
+        emerge = ease((p - 0.18) / 0.28)
+        depart = ease((p - 0.48) / 0.52)
+        if emerge > 0:
+            self.draw(
+                frame,
+                "ghost",
+                0.64 - 0.23 * depart,
+                0.61 - 0.33 * depart + 0.015 * math.sin(self.elapsed * 3),
+                0.08 + 0.22 * emerge,
+                angle=7 * math.sin(self.elapsed * 2),
+                alpha=emerge * (1 - ease((p - 0.82) / 0.18)),
+            )
+
+
 def create_cues():
     return {
         cue.name: cue
@@ -197,5 +274,8 @@ def create_cues():
             SpiderDrop(),
             ZombieHands(),
             BlackCat(),
+            CreepingFog(),
+            HauntedEyes(),
+            GhostPortal(),
         )
     }

@@ -193,7 +193,7 @@ def main():
             wait_for(lambda s: "witch_flyby" in s["active_cues"])
             post("/api/trigger/stop_animations")
             wait_for(lambda s: not s["active_cues"])
-            report["checks"].append("seven_live_cues_overlap_expire_and_cancel")
+            report["checks"].append("all_live_cues_overlap_expire_and_cancel")
             post("/api/scene/normal_camera")
             wait_for(lambda s: len(s["person_effects"]) == 2)
             identity = status()["people"][0]["id"]

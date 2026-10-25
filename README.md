@@ -4,7 +4,7 @@ Project location: `/home/kitchen/ai-projects/interactive-halloween`. The `afterd
 
 A Linux-first, local Python application that turns an RGB webcam into an interactive Halloween dance floor. The operator uses a browser on display 1; an independent Pygame/SDL window presents the camera and effects on display 2. No cloud service, browser camera permission, account, or depth camera is required.
 
-Implemented: camera capture and reconnect, MediaPipe multi-pose tracking and person segmentation, stable internal IDs, gesture detection, ten effects, seven live cue animations, five scenes, per-person effect assignments, WebSocket control, live composite preview, fullscreen output, optional sounds, and an explicit synthetic rehearsal mode.
+Implemented: camera capture and reconnect, MediaPipe multi-pose tracking and person segmentation, stable internal IDs, gesture detection, ten effects, ten live cue animations, five scenes, per-person effect assignments, WebSocket control, live composite preview, fullscreen output, optional sounds, and an explicit synthetic rehearsal mode.
 
 ## Quick start
 
@@ -297,7 +297,7 @@ Other actions are `camera_start`, `camera_stop`, `projector_start`, `projector_s
 
 ## Live cue animations
 
-The **Live cues → Animated visitors** shelf adds seven one-shot animations over the camera or standby screen:
+The **Live cues → Animated visitors** shelf adds ten one-shot animations over the camera or standby screen:
 
 | Button | Animation | Duration | API trigger |
 | --- | --- | --- | --- |
@@ -308,14 +308,17 @@ The **Live cues → Animated visitors** shelf adds seven one-shot animations ove
 | Spider drop | A spider descends on silk, wiggles, and climbs back up | 5.5 sec | `spider_drop` |
 | Zombie hands | Two green hands rise from the soil and retreat | 5 sec | `zombie_hands` |
 | Moonlit cat | A black cat emerges, blinks in a pulsing moonlight glow, and disappears | 5 sec | `black_cat` |
+| Creeping fog | Layered pearl-violet mist drifts along the bottom and fades | 9 sec | `creeping_fog` |
+| Haunted eyes | Three pairs of amber eyes peek from the shadows and blink | 6.5 sec | `haunted_eyes` |
+| Ghost portal | A swirling violet-teal ring opens, releases a friendly ghost, and closes | 8 sec | `ghost_portal` |
 
-Click a button to play once. A green playing indicator remains until that animation finishes. Clicking it again restarts its timeline. Different animations can overlap, with at most one instance of each cue. **Stop animations** cancels these seven visitors without changing the scene or individual effects; Reset scene, selecting a scene, or Reset tracking also clears them. Existing lightning, bat, ghost appearance, and sound cues retain their controls.
+Click a button to play once. A green playing indicator remains until that animation finishes. Clicking it again restarts its timeline. Different animations can overlap, with at most one instance of each cue. **Stop animations** cancels these ten visitors and pauses random automation without changing the scene or individual effects; Reset scene, selecting a scene, or Reset tracking also clears them. Existing lightning, bat, ghost appearance, and sound cues retain their controls.
 
 Cues work in every scene without detected people, and do not change random defaults or per-person overrides. The effect intensity slider sets their opacity. The final composite includes them in both the live preview and projector output. With the camera stopped, active animations still render at the configured target FPS over standby. No sound files or additional packages are needed.
 
 Use `POST /api/trigger/{key}` or send `{"action":"trigger","value":"witch_flyby"}` over `/ws`. Cancel with the `stop_animations` trigger. Status includes `cue_catalog` (labels, descriptions, durations) and `active_cues` (currently playing keys); the dashboard builds its buttons from that catalog.
 
-The implementation lives in `app/cues/`: catalog metadata, a reusable `TimedCue` base, cached BGRA artwork, and seven timeline classes. Timelines use elapsed seconds and normalized positions; they do not run inference. Sprites resize to the output viewport, independently of camera processing resolution, and rotations use expanded canvases. To add a visitor, add catalog metadata and a `TimedCue` subclass, then register it in `create_cues()`; the UI discovers it automatically.
+The implementation lives in `app/cues/`: catalog metadata, a reusable `TimedCue` base, cached BGRA artwork, and ten timeline classes. Timelines use elapsed seconds and normalized positions; they do not run inference. Sprites resize to the output viewport, independently of camera processing resolution, and rotations use expanded canvases. To add a visitor, add catalog metadata and a `TimedCue` subclass, then register it in `create_cues()`; the UI discovers it automatically.
 
 Generate the contact sheet and six-second overview reel of the actual animations:
 
@@ -357,7 +360,7 @@ To add another character, subclass `HeadOverlay`, implement `create_asset()` to 
 
 The renderer first fits the camera image into a viewport at `OUTPUT_WIDTH` × `OUTPUT_HEIGHT` (1920×1080 by default). It then draws overlays at that resolution, preserving normalized tracking alignment, and pads the result to the configured output size. For example, a 640×480 camera uses a 1440×1080 viewport with 240-pixel side bars on a 1920×1080 projector. The stopped-camera haunted-house screen fills the entire output. No extra pose inference is performed.
 
-The five head characters, skeleton skull, bats, ghost apparition, and all seven visitor animations use bundled, shaded storybook artwork with transparent edges. Art packs live in `app/assets/overlays/`: `heads.png`, `visitors.png`, `details.png`, and `visitors-blink.png`. Each atlas is 1536×1024; individual sprites are roughly 350–620 pixels on their longest side, suitable for their usual on-screen sizes at 1080p. Large closeups or 4K projection can still enlarge the source artwork. This update does not turn the RGB camera image into higher-detail footage.
+The five head characters, skeleton skull, bats, ghost apparition, and all ten visitor animations use bundled, shaded storybook artwork with transparent edges. Art packs live in `app/assets/overlays/`: `heads.png`, `visitors.png`, `details.png`, and `visitors-blink.png`. Each atlas is 1536×1024; individual sprites are roughly 350–620 pixels on their longest side, suitable for their usual on-screen sizes at 1080p. Large closeups or 4K projection can still enlarge the source artwork. This update does not turn the RGB camera image into higher-detail footage.
 
 The atlas loader extracts and caches transparent sprites at startup. Full rotated canvases preserve hats, ears, broom tips and limbs; head alignment, smoothing, opacity, random Normal Camera defaults and editable per-person assignments still work. Bats use bounded cached flap/rotation frames. Magic particles use soft additive star glows; lightning has scaled glow strokes and branching bolts. No new dependencies or network access are needed at runtime. Generated source images remain intact, and `app/assets/overlays/generation-prompts.txt` records the exact prompts used with the built-in image generation tool.
 
@@ -466,3 +469,12 @@ restart. Start show enables automation using your chosen timing and selection.
 API settings fields are `random_min_seconds`, `random_max_seconds`, and
 `random_triggers` (names from the status `auto_catalog`). Send both timing values
 together when changing to a range outside the current bounds.
+
+
+Atmospheric cue artwork is stored separately in `app/assets/overlays/creeping-fog.png`,
+`haunted-eyes.png`, and `ghost-portal.png`. All are transparent PNGs generated with
+the built-in image tool using the original visitor atlas as a style reference;
+exact prompts are in `app/assets/overlays/atmosphere-generation-prompts.txt`.
+The portal reuses the original ghost sprite. Procedural fallbacks remain available
+if a new PNG is missing. Run `.venv/bin/python scripts/preview_atmosphere_cues.py`
+to render a three-stage storyboard at `artifacts/atmosphere-storyboard.png`.

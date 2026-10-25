@@ -6,6 +6,11 @@ import cv2
 import numpy as np
 
 ASSET_DIR = Path(__file__).resolve().parents[1] / "assets/overlays"
+SPRITE_FILES = {
+    "fog_bank": "creeping-fog.png",
+    "haunted_eyes": "haunted-eyes.png",
+    "portal_ring": "ghost-portal.png",
+}
 # The generator packs objects with slightly irregular gutters. Use their actual
 # bounds rather than assuming an exact grid and cutting off hats or broom tips.
 REGIONS = {
@@ -39,8 +44,21 @@ def _atlas(name):
     return image
 
 
-@lru_cache(maxsize=len(REGIONS))
+@lru_cache(maxsize=len(REGIONS) + len(SPRITE_FILES))
 def load_sprite(name):
+    if name in SPRITE_FILES:
+        path = ASSET_DIR / SPRITE_FILES[name]
+        image = cv2.imread(str(path), cv2.IMREAD_UNCHANGED) if path.is_file() else None
+        if image is None or image.ndim != 3 or image.shape[2] != 4:
+            return None
+        # Trim transparent padding, keeping disconnected eyes and delicate mist.
+        points = cv2.findNonZero((image[:, :, 3] > 0).astype(np.uint8))
+        if points is None:
+            return None
+        x, y, width, height = cv2.boundingRect(points)
+        image = image[y : y + height, x : x + width].copy()
+        image.flags.writeable = False
+        return image
     atlas, (x1, y1, x2, y2) = REGIONS[name]
     image = _atlas(atlas)
     if image is None:

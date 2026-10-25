@@ -475,3 +475,44 @@ Maximum people default changed to 8 in Config, .env, .env.example, and initial
 controller markup. Applied max_people=8 to the running show through /api/settings
 and verified it in work/show-settings.json for future restarts. No service
 restart was needed. This changes capacity, not verified eight-person performance.
+
+
+## Creeping fog, haunted eyes, and ghost portal — 2026-10-24
+
+Added three TimedCue animations and catalog entries: creeping_fog (9 seconds),
+haunted_eyes (6.5 seconds), ghost_portal (8 seconds). The UI discovers their manual
+buttons and automation checkboxes from the shared catalog; ten visitor cues and
+four triggered effects are now available to the random scheduler. Each cue can
+play without a camera, restart, overlap, expire, and cancel through the existing
+controls. Effect intensity applies to all three. Fog drifts in three layers along
+the floor; eyes appear with staggered fades and blink; a rotating portal opens
+and closes while the original ghost emerges and floats upward.
+
+Generated three transparent PNGs with built-in image_gen, using the existing
+visitor atlas as the style reference, with no API key/runtime network dependency.
+Files and exact prompts live in app/assets/overlays; see its asset README. Preserved
+original atlas art. Standalone loading retains disjoint eyes and the portal hole.
+Procedural fallback art is in app/cues/atmosphere_art.py. Added vertical sprite
+scaling for blinking, and capped the CPU scale cache at four entries so varying
+portal sizes cannot accumulate textures. Both CPU and experimental GPU canvases
+use these shared timelines. The primary live renderer remains CPU.
+
+Verification: the full 82-test suite (including all new catalog-parametrized
+cases and software EGL shader checks) passed, followed by five added targeted
+checks for bounded caches, generated alpha/portal hole, and missing-asset fallbacks.
+All 18 synthetic SDL-dummy smoke checks passed with all ten cues overlapping,
+expiring, and cancelling. Ruff and diff whitespace checks passed. A full-size
+storyboard was visually reviewed over the original haunted-house background:
+artifacts/atmosphere-storyboard.png; regenerate with scripts/preview_atmosphere_cues.py.
+Smoke shutdown emitted a resource_tracker semaphore-cleanup warning; the process
+exited successfully. The existing Starlette/AnyIO deprecation warning remains.
+Physical extended-projector routing was not revalidated.
+
+Deployed via systemd restart and verified all three live API triggers reached
+active_cues without runtime errors. Preserved max_people=8, the 3–10 second range,
+scene/effect settings, and stopped camera/projector requests. Because the prior
+saved automatic selection included every available item, added the three new
+cues to that saved selection (14 items total). Automation remains off, matching
+the user's current choice; enable it or use Start show when desired. Curated
+subsets are not automatically expanded. Pre-update status is retained at
+work/before-atmosphere-cues-status.json.

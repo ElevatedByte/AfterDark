@@ -43,4 +43,22 @@ LIVE_CUES = {
         "duration": 5.0,
         "description": "A black cat rises in a moonlit glow, blinks, and vanishes.",
     },
+    "creeping_fog": {
+        "label": "Creeping fog",
+        "icon": "≋",
+        "duration": 9.0,
+        "description": "Pearl-violet mist curls across the floor and softly fades away.",
+    },
+    "haunted_eyes": {
+        "label": "Haunted eyes",
+        "icon": "◉",
+        "duration": 6.5,
+        "description": "Glowing eyes peek from the shadows, blink, and disappear.",
+    },
+    "ghost_portal": {
+        "label": "Ghost portal",
+        "icon": "◎",
+        "duration": 8.0,
+        "description": "A swirling violet portal opens, releases a friendly ghost, and closes.",
+    },
 }

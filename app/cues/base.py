@@ -61,7 +61,9 @@ class TimedCue(Effect):
         fade = min(1.0, self.elapsed / 0.2, (self.duration - self.elapsed) / 0.35)
         return max(0.0, fade) * self.settings.get("effect_intensity", 0.75)
 
-    def draw(self, frame, key, x, y, height, angle=0, alpha=1.0, flip=False):
+    def draw(
+        self, frame, key, x, y, height, angle=0, alpha=1.0, flip=False, scale_y=1.0
+    ):
         """Place a cached sprite in normalized screen coordinates; retain its aspect."""
         h, w = frame.shape[:2]
         asset = self.assets[key]
@@ -69,28 +71,31 @@ class TimedCue(Effect):
         pixels = max(
             1, round(min(h * height, w * 0.85 * asset.shape[0] / asset.shape[1]))
         )
+        draw_height = max(1, round(pixels * scale_y))
         if hasattr(frame, "sprite"):
             frame.sprite(
                 asset,
                 x * w,
                 y * h,
                 max(1, round(asset.shape[1] * pixels / asset.shape[0])),
-                pixels,
+                draw_height,
                 angle=angle,
                 alpha=self.opacity * alpha,
                 flip=flip,
             )
             return
-        cache_key = (key, pixels, flip)
+        cache_key = (key, pixels, flip, draw_height)
         if cache_key not in self._scaled:
             sw = max(1, round(asset.shape[1] * pixels / asset.shape[0]))
             sprite = cv2.resize(
                 asset,
-                (sw, pixels),
+                (sw, draw_height),
                 interpolation=cv2.INTER_AREA
                 if pixels < asset.shape[0]
                 else cv2.INTER_LANCZOS4,
             )
+            if len(self._scaled) >= 4:
+                self._scaled.pop(next(iter(self._scaled)))
             self._scaled[cache_key] = cv2.flip(sprite, 1) if flip else sprite
         sprite = self._scaled[cache_key]
         if angle:
