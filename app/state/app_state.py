@@ -42,6 +42,7 @@ TRIGGERS = (
 
 class SettingsPatch(BaseModel):
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    random_show: bool | None = None
     fullscreen: bool | None = None
     debug_skeleton: bool | None = None
     effect_intensity: float | None = Field(None, ge=0, le=1)
@@ -70,6 +71,8 @@ class AppState:
             projector_monitor_actual=None,
             fullscreen=config.fullscreen,
             debug_skeleton=False,
+            random_show=config.random_show,
+            last_auto_trigger=None,
             active_scene="normal_camera",
             active_effects=[],
             active_cues=[],
@@ -178,6 +181,8 @@ class AppState:
     def trigger(self, name):
         if name not in TRIGGERS:
             raise ValueError(f"Unknown trigger: {name}")
+        if name == "stop_animations":
+            self.update(random_show=False)
         if name == "reset_scene":
             self.set_scene("normal_camera")
         elif name == "reset_tracking":

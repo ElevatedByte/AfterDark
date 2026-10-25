@@ -62,7 +62,7 @@ function render(s) {
   $('effect-count').textContent=s.active_effects.length+' ACTIVE';
   for(const key of Object.keys(effects)) $('effect-'+key).checked=s.active_effects.includes(key);
   document.querySelectorAll('[data-scene]').forEach(b=>{const active=b.dataset.scene===s.active_scene;b.classList.toggle('active',active);b.setAttribute('aria-pressed',active);});
-  for(const key of ['fullscreen','debug_skeleton','adaptive_resolution']) $(key).checked=s[key];
+  for(const key of ['fullscreen','debug_skeleton','adaptive_resolution','random_show']) $(key).checked=s[key];
   for(const key of ['projector_monitor_index','max_people']) if(document.activeElement!==$(key)) $(key).value=s[key];
   for(const [key,value] of Object.entries(s.effect_settings)) {
     if(document.activeElement!==$(key) && !sliderTimers[key]) {$(key).value=value;$(key+'-value').textContent=Math.round(value*100)+'%';}
@@ -99,7 +99,7 @@ $('camera-button').onclick=()=>command({action:state?.camera_requested?'camera_s
 $('projector-button').onclick=()=>command({action:state?.projector_requested?'projector_stop':'projector_start'});
 document.querySelectorAll('[data-scene]').forEach(b=>b.onclick=()=>command({action:'scene',value:b.dataset.scene}));
 document.querySelectorAll('[data-trigger]').forEach(b=>b.onclick=()=>{command({action:'trigger',value:b.dataset.trigger});if(!b.dataset.trigger.startsWith('reset'))toast(b.dataset.trigger==='stop_animations'?'Animations stopped':'Cue fired: '+b.textContent.replace(/[1234]/g,'').trim());});
-for(const key of ['fullscreen','debug_skeleton','adaptive_resolution']) $(key).onchange=e=>command({action:'settings',settings:{[key]:e.target.checked}});
+for(const key of ['fullscreen','debug_skeleton','adaptive_resolution','random_show']) $(key).onchange=e=>command({action:'settings',settings:{[key]:e.target.checked}});
 for(const key of ['max_people','projector_monitor_index']) $(key).onchange=e=>command({action:'settings',settings:{[key]:Number(e.target.value)}});
 for(const key of ['effect_intensity','ghost_trail_strength','particle_amount','tracking_smoothing']) {
   $(key).oninput=e=>{const value=Number(e.target.value);$(key+'-value').textContent=Math.round(value*100)+'%';clearTimeout(sliderTimers[key]);sliderTimers[key]=setTimeout(()=>{delete sliderTimers[key];command({action:'settings',settings:{[key]:value}});},45);};

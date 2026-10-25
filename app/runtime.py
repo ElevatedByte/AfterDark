@@ -6,6 +6,7 @@ import threading
 import time
 import cv2
 from app.camera.camera_manager import CameraManager
+from app.cues.automation import RandomShow
 from app.renderer.compositor import (
     standby_frame,
     draw_debug,
@@ -34,6 +35,7 @@ class Runtime:
         self.identities = PersonTracker(config.tracking_smoothing, config.track_timeout)
         self.gestures = GestureDetector(config)
         self.effects = EffectManager()
+        self.random_show = RandomShow()
         self._tracking_revision = 0
         self.projector = Projector(config)
         self._stop = threading.Event()
@@ -331,6 +333,16 @@ class Runtime:
                 )
                 if event.trigger == "lightning":
                     self.projector.send({"type": "sound", "name": "lightning"})
+        automatic = self.random_show.tick(
+            now, snapshot["random_show"], self.effects.active_cues
+        )
+        if automatic:
+            try:
+                self.state.trigger(automatic)
+            except ValueError:
+                pass  # A busy manual queue takes priority over automation.
+            else:
+                self.state.update(last_auto_trigger=automatic)
         while True:
             try:
                 trigger = self.state.commands.get_nowait()

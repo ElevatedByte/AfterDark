@@ -29,6 +29,7 @@ class Config(BaseModel):
     host: str = "127.0.0.1"
     port: int = Field(8000, ge=1024, le=65535)
     demo_mode: bool = False
+    random_show: bool = False
     hands_above_duration: float = Field(0.6, ge=0.1, le=5)
     hands_together_distance: float = Field(0.10, ge=0.02, le=0.4)
     gesture_cooldown: float = Field(2, ge=0.2, le=10)

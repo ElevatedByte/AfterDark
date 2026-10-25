@@ -6,7 +6,7 @@ if [[ ! -x .venv/bin/python ]]; then
   echo 'Missing local .venv. Follow handoff/DESTINATION_SETUP.md.' >&2
   exit 1
 fi
-export HOST=127.0.0.1
+export HOST="${HOST:-127.0.0.1}"
 export PYGAME_HIDE_SUPPORT_PROMPT=1
 export PROJECTOR_MONITOR="${PROJECTOR_MONITOR:-0}"
 export FULLSCREEN="${FULLSCREEN:-false}"

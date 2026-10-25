@@ -1,14 +1,12 @@
-# Optional user-session service. Review hardware/display setup before enabling.
+# Boot-start user service; enable lingering for access before login.
 [Unit]
 Description=Afterdark local Halloween projector control
-After=graphical-session.target
-PartOf=graphical-session.target
 
 [Service]
 Type=simple
 WorkingDirectory=%h/Documents/Codex/Afterdark
 ExecStart=%h/Documents/Codex/Afterdark/run-local.sh
-Environment=HOST=127.0.0.1
+Environment=HOST=0.0.0.0
 Environment=PROJECTOR_MONITOR=0
 Environment=FULLSCREEN=false
 Environment=AUTO_START_CAMERA=false
@@ -17,4 +15,4 @@ RestartSec=3
 TimeoutStopSec=12
 
 [Install]
-WantedBy=graphical-session.target
+WantedBy=default.target

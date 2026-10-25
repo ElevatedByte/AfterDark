@@ -234,3 +234,145 @@ To avoid experimental GPU code, simply use `./run-local.sh` (CPU default).
 Optional ModernGL packages do not alter baseline direct pins. To restore a fully
 baseline environment, create a new venv from the retained interpreter and install
 only `requirements-dev.txt`.
+
+
+## Setup completion audit — 2026-10-24
+
+Reviewed START_HERE.md against this workstation's existing installation and
+verification records. The fresh local Python 3.11.17 environment and original
+requirements were already installed; reinstalling or replacing the working
+virtual environment was unnecessary. Re-ran `setup_project.py --check --dev`:
+pinned dependencies, pip consistency, pytest/Ruff availability, and model SHA-256
+all passed. Reverified all 144 manifest entries inside the retained original ZIP;
+the developed working tree intentionally differs from the transfer snapshot.
+
+Created the previously absent `.env` from `.env.example`, selecting monitor 0
+and windowed output to match run-local.sh's existing defaults. Loopback binding,
+real-camera mode, and all other example defaults are retained. The file is Git
+ignored. Launchers load it on their next launch; direct Python launches do not.
+Both Bash launchers passed syntax checks. No running show was restarted.
+
+Current verification: 62 unit tests passed, Ruff passed, and all 17 isolated
+synthetic smoke checks passed (SDL dummy; 16.2 synthetic FPS; 0.21 s shutdown).
+One existing Starlette/AnyIO deprecation warning remains. Sandbox socket creation
+was blocked and its unit-test run stalled after 12 tests; host-loopback reruns
+passed and the stalled test process was stopped. Smoke output is in
+`artifacts/smoke-test.json` and `artifacts/smoke-server.log`.
+
+All applicable installation/rehearsal steps in START_HERE.md are complete.
+Physical extended-projector routing, fullscreen on that projector, real-person
+tracking, and optional audio still require hardware acceptance. The optional
+user service is outside START_HERE.md and remains a template. GPU migration is
+separate development work; this audit does not change the active CPU renderer.
+
+
+## LAN controller access — 2026-10-24
+
+The user explicitly authorized access from other devices on this network,
+overriding the earlier loopback-only deployment requirement for this workstation.
+`.env` now sets `HOST=0.0.0.0`; run-local.sh honors HOST with a loopback fallback.
+The running single-worker server was restarted on all IPv4 interfaces at port
+8000, retaining the desktop environment and stopped camera/projector state.
+Current controller URL: http://192.168.0.198:8000 (eno1, 192.168.0.0/24).
+This address is DHCP-assigned and can change; reserve it in the router if desired.
+
+Verified HTTP 200 for the controller page and API status over the LAN address,
+and WebSocket status delivery with the matching LAN browser Origin. Confirmed
+listener 0.0.0.0:8000. Verification ran on this workstation; another physical
+client and router client-isolation behavior have not been tested.
+UFW configuration has ENABLED=no. Privileged `ufw status` requires interactive
+sudo authentication, so live firewall rules were not fully inspected; no firewall
+rules were changed. If another client is blocked by a separately enabled firewall,
+allow TCP 8000 from 192.168.0.0/24 on eno1 rather than disabling that firewall.
+
+The controller remains unauthenticated: devices that can reach port 8000 can
+control the show and view previews. No router port forwarding or public hosting
+was configured. To undo LAN access, set HOST=127.0.0.1 in .env and restart through
+run-local.sh. Direct Python commands do not load .env; use the launcher for the
+persistent setting. No user service was installed.
+
+
+## Automatic boot startup enabled — 2026-10-24
+
+At the user's request, installed deploy/afterdark.service as
+`~/.config/systemd/user/afterdark.service`, enabled it for `default.target`, and
+ran `loginctl enable-linger deven` (verified Linger=yes). This replaces the earlier
+optional graphical-session template instructions: the website now starts at boot
+without login and remains up after logout. The unit uses Restart=on-failure and
+runs the local launcher with the existing LAN binding on port 8000. The previous
+manual server was shut down cleanly before service takeover; one worker remains.
+
+`.env` now has AUTO_START_CAMERA=false, matching the stopped state at takeover.
+The website starts without requiring camera or desktop hardware. Start camera
+and projector from the controller when needed. Projector output requires an
+active graphical login; before-login website availability is separate from
+physical projector acceptance. The current user manager already has the desktop
+display environment. If session credentials change, import the current desktop
+environment and restart the service from the logged-in desktop terminal.
+
+Verified enabled/active state, a managed restart, LAN HTTP and WebSocket status
+at http://192.168.0.198:8000, and a single 0.0.0.0:8000 listener. No reboot was
+performed; boot behavior is configured, not verified by a physical reboot.
+No firewall or router settings were changed in this step.
+
+Manage from this user's terminal:
+
+```bash
+systemctl --user status afterdark
+systemctl --user restart afterdark
+journalctl --user -u afterdark -f
+systemctl --user disable --now afterdark  # undo automatic app startup
+```
+
+Do not start a second manual copy while the service is active. Lingering is an
+account-wide setting; disabling this service does not disable other user services.
+
+
+## Persistent Ethernet address — 2026-10-24
+
+User requested a stable address across reboots. Active NetworkManager profile
+`afterdark-static` (ea47ca50-dcfa-47d2-af4f-7539c4650f6f) now uses manual IPv4
+192.168.0.198/24, gateway/DNS 192.168.0.1, on eno1 / MAC 10:60:4B:5C:4F:96.
+Autoconnect is enabled with priority 100. NetworkManager persisted it through
+Netplan at /etc/netplan/90-NM-ea47ca50-dcfa-47d2-af4f-7539c4650f6f.yaml;
+D-Bus Unsaved=false confirmed. The installer-managed profile retained auto method
+when edited, so a dedicated profile was necessary. Original netplan-eno1 was
+returned to DHCP with no manual address/gateway/DNS and retained as a lower-priority
+fallback. Before-change profile details are in work/network-before-static.txt.
+
+Activated the static profile successfully, verified unlimited address lifetime,
+static default route, DNS resolution, and HTTP 200 at http://192.168.0.198:8000.
+No reboot was performed. This supersedes the prior DHCP-address description.
+The router's pool/reservations have not been inspected or changed. To prevent
+the router leasing this address to a different client, reserve 192.168.0.198
+for MAC 10:60:4B:5C:4F:96 or exclude that address from its DHCP pool. Host-side
+static configuration alone cannot guarantee freedom from router lease conflicts.
+
+Rollback from a local desktop terminal:
+`nmcli connection modify afterdark-static connection.autoconnect no`
+then `nmcli connection up netplan-eno1`.
+
+
+## Automatic random visitors and effects — 2026-10-24
+
+Implemented server-owned random scheduling in app/cues/automation.py and the
+runtime frame loop. Every event gets a newly sampled uniform 3–10 second delay.
+The selection includes all seven visitors plus lightning, bats, ghost appearance,
+and spell burst. Immediate repeats and currently active visitors are excluded.
+Reset/stop actions and sound-only scream are excluded. Delayed frames schedule
+from the present time rather than accumulating a burst. Automatic events reuse
+the existing bounded command queue and normal effect/audio handling; a full
+manual queue takes priority. Works on standby without a camera or browser.
+
+The website has an Automatic visitors & effects switch. Stop animations also
+pauses automation; turn the switch on again to resume after a fresh delay.
+Config RANDOM_SHOW defaults false for isolated tests/other installations;
+this workstation's .env sets RANDOM_SHOW=true, enabling automation after boot.
+Operator toggle state is in memory and returns to the configured default on
+service restart, like the other runtime show controls. Interval is fixed at
+3–10 seconds. Existing manual buttons and per-person effects are preserved.
+
+Verification: 65 unit tests passed, including interval bounds, no catch-up burst,
+repeat/active-cue exclusion, pause/resume, and stop-button behavior. Ruff passed.
+Existing Starlette/AnyIO warning remains. The isolated SDL dummy smoke test
+checks existing scenes, effects, cues, and controls; see artifacts/smoke-test.json.
