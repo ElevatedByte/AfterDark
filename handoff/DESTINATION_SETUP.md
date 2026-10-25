@@ -376,3 +376,96 @@ Verification: 65 unit tests passed, including interval bounds, no catch-up burst
 repeat/active-cue exclusion, pause/resume, and stop-button behavior. Ruff passed.
 Existing Starlette/AnyIO warning remains. The isolated SDL dummy smoke test
 checks existing scenes, effects, cues, and controls; see artifacts/smoke-test.json.
+
+
+## Saved preferences and Start/Stop show — 2026-10-24
+
+Added prominent Start show and Stop show buttons above system status. Both use
+the existing WebSocket dispatcher; equivalent HTTP endpoints are POST
+/api/show/start and /api/show/stop. Start requests camera/projector and enables
+random automation together. Stop clears the bounded pending-trigger queue,
+disables automation, requests camera/projector shutdown, and resets transient
+animations on the processing thread. Scene/effect selections and sliders remain.
+The UI distinguishes starting, running, stopping, stopped, automation-only, and
+manual operation, and displays hardware errors rather than claiming success
+from a command acknowledgement. Existing individual controls remain available.
+
+The local .env now sets SETTINGS_PATH to
+/home/deven/Documents/Codex/Afterdark/work/show-settings.json. Settings changes,
+scene selection, effect toggles, Stop animations, and Start/Stop show save a
+versioned, validated JSON document using temporary-file replacement and fsync.
+Saved preferences include scene, active effects, automation, effect sliders,
+smoothing, maximum people, monitor, fullscreen, debug skeleton, and adaptive
+resolution. Settings are shared across controllers and restored after restart;
+this supersedes the earlier note that all operator settings are in memory.
+Camera/projector requested/running state, person IDs/assignments, active visitors,
+and telemetry are deliberately session state. The website still boots without
+starting camera/projector; Start show opens them. Saving automation on/off takes
+precedence over RANDOM_SHOW on subsequent launches. Start show enables it again.
+
+The initial saved document was seeded from the live operator selections before
+deployment. Startup validates the entire saved file before applying preferences.
+Invalid/unreadable files leave defaults active and show a visible warning. Save
+failures preserve the prior file and report that active changes were not saved;
+a subsequent successful change clears the warning. No telemetry writes occur.
+The file is under Git-ignored work/; include it separately when moving personal
+preferences to another workstation. Config without SETTINGS_PATH retains the
+previous in-memory behavior. Smoke tests remove inherited SETTINGS_PATH so they
+cannot change live preferences.
+
+Validation: 73 tests passed, Ruff and diff whitespace checks passed, and all 18
+synthetic SDL-dummy smoke checks passed. Added coverage for restoration, excluding
+runtime/person state, invalid files, atomic write failure/recovery, concurrent
+controllers, a full trigger queue, and HTTP/WebSocket start/stop. Browser testing
+on the LAN controller confirmed Start show brought up the real camera (connected)
+and projector window on monitor 0 with automation enabled, with no runtime error.
+Stop show shut down both and cleared visitors. A browser-changed automation
+setting survived an actual systemd service restart. Physical extended-projector
+routing and real-person acceptance were not repeated. Restored the prior idle
+state: camera/projector stopped and random automation enabled. Screenshot:
+artifacts/saved-show-controls.png. One existing Starlette/AnyIO warning remains.
+
+
+## Configurable random timing and selection — 2026-10-24
+
+Added minimum/maximum delay controls (1–300 seconds) and separate Visitors/Effects
+checkbox groups in Live cues. Apply timing saves the pair together; checkboxes,
+Select all, and Clear save immediately. Defaults remain 3–10 seconds and all seven
+visitors plus lightning, bats, ghost appearance, and magic burst. These are the
+existing triggered effects; person-attached effect assignments remain separate.
+
+SettingsPatch and saved preferences now include random_min_seconds,
+random_max_seconds, and random_triggers. HTTP/WebSocket reject unknown items,
+nonfinite/out-of-range delays, and a minimum greater than the effective maximum,
+including partial updates. Selection is normalized and deduplicated. Older saved
+files load the original defaults for the new fields without losing other choices.
+The timing pair in a saved file is validated before any saved setting is applied.
+
+The server scheduler resets its pending delay when timing/selection changes.
+Equal bounds give a fixed interval. Empty selection schedules nothing; Start show
+does not overwrite the selection. A single selected item can repeat; a visitor
+already playing finishes instead of restarting. If every selected visitor is
+currently playing, that opportunity is skipped. No catch-up bursts are queued.
+The queue admission check also rejects an event removed by a concurrent settings
+change. Manual cue buttons continue to work regardless of automatic selection.
+
+Validation: 79 tests passed, all 18 isolated SDL-dummy smoke checks passed, Ruff
+and diff whitespace checks passed. Browser verified Apply timing, Clear, individual
+visitor/effect choices, and live status updates. A 2–4 second range with only Witch
+flyby and Magic burst survived an actual service restart; live event observations
+confirmed only those selected items fired. Restored the user's original range
+(3–10 seconds), all 11 items, and original automation state after verification.
+Screenshot: artifacts/automation-options.png. No physical projector acceptance
+was repeated. Existing Starlette/AnyIO warning remains.
+
+
+UI layout update: moved the complete automatic visitors/effects settings block
+(toggle, timing, and selection checklist) below the Animated visitors group and
+its help text. This is an HTML ordering change; existing controls and saved
+settings are unchanged. Static HTML is served directly; no service restart needed.
+
+
+UI layout update: automation settings beneath the visitors now use a native
+HTML details/summary disclosure labeled Automation settings, collapsed by default.
+Click or keyboard activation expands the toggle, timing, and inclusion controls.
+Collapsing the section does not change automation or saved show preferences.

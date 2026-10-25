@@ -334,15 +334,15 @@ class Runtime:
                 if event.trigger == "lightning":
                     self.projector.send({"type": "sound", "name": "lightning"})
         automatic = self.random_show.tick(
-            now, snapshot["random_show"], self.effects.active_cues
+            now,
+            snapshot["random_show"],
+            self.effects.active_cues,
+            minimum=snapshot["random_min_seconds"],
+            maximum=snapshot["random_max_seconds"],
+            included=snapshot["random_triggers"],
         )
         if automatic:
-            try:
-                self.state.trigger(automatic)
-            except ValueError:
-                pass  # A busy manual queue takes priority over automation.
-            else:
-                self.state.update(last_auto_trigger=automatic)
+            self.state.trigger_automatic(automatic)
         while True:
             try:
                 trigger = self.state.commands.get_nowait()

@@ -28,9 +28,11 @@ def main():
         sock.bind(("127.0.0.1", 0))
         port = sock.getsockname()[1]
     env = os.environ.copy()
+    env.pop("SETTINGS_PATH", None)  # Never read or overwrite the live show preferences.
     env.update(
         PORT=str(port),
         DEMO_MODE="true",
+        RANDOM_SHOW="false",
         CAMERA_WIDTH="640",
         CAMERA_HEIGHT="480",
         OUTPUT_WIDTH="960",
@@ -273,6 +275,33 @@ def main():
                 and s["active_scene"] == "normal_camera"
             )
             report["checks"].append("camera_restart_tracking_reset_scene_reset")
+            post("/api/show/start")
+            wait_for(
+                lambda s: s["camera_running"]
+                and s["projector_running"]
+                and s["random_show"]
+            )
+            post("/api/trigger/witch_flyby")
+            wait_for(lambda s: "witch_flyby" in s["active_cues"])
+            post("/api/show/stop")
+            wait_for(
+                lambda s: not s["camera_running"]
+                and not s["projector_running"]
+                and not s["random_show"]
+                and not s["active_cues"]
+            )
+            # Stop also clears visitors when the camera was already stopped.
+            post("/api/trigger/spider_drop")
+            wait_for(lambda s: "spider_drop" in s["active_cues"])
+            post("/api/show/stop")
+            wait_for(lambda s: not s["active_cues"])
+            post("/api/show/start")
+            wait_for(
+                lambda s: s["camera_running"]
+                and s["projector_running"]
+                and s["random_show"]
+            )
+            report["checks"].append("start_stop_show_and_clear_pending_animation")
             time.sleep(1.2)
             report["fps"] = status()["fps"]
             # Keep a preview connected: shutdown must not wait forever for MJPEG.

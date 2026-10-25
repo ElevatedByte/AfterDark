@@ -5,6 +5,31 @@ const effects = {pumpkin_head:['◈','Pumpkin Head'],witch:['✧','Witch'],frank
 let state = null, socket, toastTimer, lastPeople = '', requestID = 0;
 const sliderTimers = {};
 const cueButtons = new Map();
+const automationChoices = new Map();
+let timingDraft = false;
+function renderAutomation(s) {
+  for (const group of ['Visitors','Effects']) {
+    for (const [key, item] of Object.entries(s.auto_catalog || {})) {
+      if (item.group !== group || automationChoices.has(key)) continue;
+      let fieldset=$('auto-group-'+group);
+      if (!fieldset) {
+        fieldset=document.createElement('fieldset');fieldset.id='auto-group-'+group;
+        const legend=document.createElement('legend');legend.textContent=group;
+        fieldset.append(legend);$('automation-choices').append(fieldset);
+      }
+      const label=document.createElement('label');label.className='automation-choice';
+      const input=document.createElement('input');input.type='checkbox';input.id='auto-'+key;
+      const text=document.createElement('span');text.textContent=item.label;
+      label.append(input,text);fieldset.append(label);automationChoices.set(key,input);
+      input.onchange=()=>command({action:'settings',settings:{random_triggers:[...automationChoices].filter(([,box])=>box.checked).map(([name])=>name)}});
+    }
+  }
+  const selected=s.random_triggers || [];
+  for (const [name,input] of automationChoices) input.checked=selected.includes(name);
+  if (!timingDraft) for (const key of ['random_min_seconds','random_max_seconds']) $(key).value=s[key];
+  const timing=s.random_min_seconds===s.random_max_seconds?s.random_min_seconds:s.random_min_seconds+'–'+s.random_max_seconds;
+  $('automation-summary').textContent=!selected.length?'No items selected — automatic triggers are paused.':(s.random_show?'On':'Paused')+' · Every '+timing+' seconds · '+selected.length+' selected';
+}
 function renderCues(s) {
   for (const [key, cue] of Object.entries(s.cue_catalog || {})) {
     if (cueButtons.has(key)) continue;
@@ -47,6 +72,14 @@ function command(payload) {
 function render(s) {
   state=s;
   renderCues(s);
+  renderAutomation(s);
+  const requested=s.camera_requested && s.projector_requested && s.random_show;
+  const running=s.camera_running && s.projector_running;
+  const stopping=!s.camera_requested && !s.projector_requested && (s.camera_running || s.projector_running);
+  $('show-status').textContent=stopping?'STOPPING':requested?(s.camera_error || s.projector_error || s.runtime_error?'NEEDS ATTENTION':running?'SHOW RUNNING':'STARTING'):s.camera_requested || s.projector_requested?'MANUAL CONTROL':s.random_show?'AUTOMATION ONLY':'SHOW STOPPED';
+  $('show-start').disabled=requested && !s.camera_error && !s.projector_error && !s.runtime_error;
+  $('show-stop').disabled=!(s.camera_requested || s.projector_requested || s.random_show || s.camera_running || s.projector_running || s.active_cues.length);
+  $('settings-save-status').textContent=s.settings_save_error || (s.settings_persistence?'Settings saved automatically · restored after restart':'Settings apply to this session');
   $('camera-status').textContent=s.demo_mode && s.camera_running?'Rehearsal':s.camera_connected?'Connected':s.camera_running?'Reconnecting':'Stopped';
   $('fps').textContent=s.fps.toFixed(1);
   $('people-count').innerHTML=`${s.tracked_people_count} <small>/ ${s.max_people}</small>`;
@@ -69,7 +102,7 @@ function render(s) {
   }
   const timing=s.renderer_timings?.composition_and_control;
   $('renderer-state').textContent='Renderer: '+(s.renderer_backend || 'cpu').toUpperCase()+(timing?' · composition '+timing.median_ms+' ms median / '+timing.p95_ms+' ms p95':'');
-  const errors=[s.preview_error,s.runtime_error,s.camera_error,s.tracking_error,s.projector_error].filter(Boolean);
+  const errors=[s.settings_save_error,s.preview_error,s.runtime_error,s.camera_error,s.tracking_error,s.projector_error].filter(Boolean);
   if(s.resolution_reduced) errors.push('Processing reduced to 640 × 480 to improve frame rate.');
   $('errors').hidden=!errors.length;$('errors').textContent=errors.join(' · ');
   $('tracker-state').textContent='Tracking: '+s.tracking_status+(s.last_gesture?' · '+s.last_gesture:'');
@@ -92,9 +125,25 @@ function connect() {
   socket=new WebSocket(`${location.protocol==='https:'?'wss':'ws'}://${location.host}/ws`);
   socket.onopen=()=>{$('connection').textContent='Controller connected';$('connection-dot').classList.add('online');};
   socket.onmessage=e=>{try {const data=JSON.parse(e.data);if(data.data)render(data.data);if(data.type==='error')toast(data.message);}catch{toast('Could not read controller update');}};
-  socket.onclose=()=>{$('connection').textContent='Reconnecting…';$('connection-dot').classList.remove('online');setTimeout(connect,1500);};
+  socket.onclose=()=>{$('show-start').disabled=true;$('show-stop').disabled=true;$('show-status').textContent='DISCONNECTED';$('connection').textContent='Reconnecting…';$('connection-dot').classList.remove('online');setTimeout(connect,1500);};
   socket.onerror=()=>socket.close();
 }
+for (const key of ['random_min_seconds','random_max_seconds']) $(key).oninput=()=>{timingDraft=true;$('automation-timing-error').hidden=true;};
+$('automation-timing').onsubmit=e=>{
+  e.preventDefault();
+  const minimum=Number($('random_min_seconds').value), maximum=Number($('random_max_seconds').value);
+  if (minimum>maximum) {
+    $('automation-timing-error').textContent='Minimum delay must be less than or equal to maximum delay.';
+    $('automation-timing-error').hidden=false;return;
+  }
+  if (command({action:'settings',settings:{random_min_seconds:minimum,random_max_seconds:maximum}})) {
+    timingDraft=false;$('automation-timing-error').hidden=true;
+  }
+};
+$('automation-select-all').onclick=()=>command({action:'settings',settings:{random_triggers:Object.keys(state?.auto_catalog || {})}});
+$('automation-clear').onclick=()=>command({action:'settings',settings:{random_triggers:[]}});
+$('show-start').onclick=()=>command({action:'show_start'});
+$('show-stop').onclick=()=>command({action:'show_stop'});
 $('camera-button').onclick=()=>command({action:state?.camera_requested?'camera_stop':'camera_start'});
 $('projector-button').onclick=()=>command({action:state?.projector_requested?'projector_stop':'projector_start'});
 document.querySelectorAll('[data-scene]').forEach(b=>b.onclick=()=>command({action:'scene',value:b.dataset.scene}));

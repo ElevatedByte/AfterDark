@@ -27,6 +27,13 @@ def camera(action: str, request: Request):
     return execute(request, action=f"camera_{action}")
 
 
+@router.post("/show/{action}")
+def show(action: str, request: Request):
+    if action not in ("start", "stop"):
+        raise HTTPException(404, "Unknown show action")
+    return execute(request, action=f"show_{action}")
+
+
 @router.post("/projector/{action}")
 def projector(action: str, request: Request):
     if action not in ("start", "stop"):

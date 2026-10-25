@@ -428,3 +428,41 @@ Next improvements: rehearse with 2–4 dancers on the target hardware and tune g
 - [MediaPipe Pose Landmarker Python guide](https://developers.google.com/edge/mediapipe/solutions/vision/pose_landmarker/python) — Tasks API, multiple poses, video timestamps, segmentation outputs.
 - [MediaPipe model overview](https://developers.google.com/edge/mediapipe/solutions/vision/pose_landmarker) — official downloadable model bundle and landmark index map.
 - [MediaPipe 0.10.32 package](https://pypi.org/project/mediapipe/0.10.32/) — pinned runtime distribution and platform wheel information.
+
+
+## Saved show settings and one-touch controls
+
+Use **Start show** at the top of the controller to start the camera, projector,
+and automatic visitors together. **Stop show** shuts down camera/projector,
+pauses automation, and clears queued animations while retaining your scene and
+effect choices. Individual camera, projector, and cue controls still work.
+Projector output requires the workstation's logged-in graphical session.
+
+On this workstation, operator preferences save automatically to
+`work/show-settings.json` through the `SETTINGS_PATH` entry in `.env`.
+Scenes, effects, automation, sliders, monitor, fullscreen, and tracking settings
+return after restarting the service. Camera/projector running state and temporary
+person assignments do not persist. The controller shows a warning if settings
+cannot be loaded or saved. Start show always enables automation; Stop show saves
+it as off until you enable it again. The website remains available while stopped.
+
+For another installation, set `SETTINGS_PATH=work/show-settings.json` in `.env`
+and launch with `run-local.sh` or `run.sh`. Omitting SETTINGS_PATH keeps settings
+in memory. API controls: `POST /api/show/start`, `POST /api/show/stop`, or WebSocket
+commands with action `show_start` / `show_stop`.
+
+
+### Random-show timing and included items
+
+Under **Live cues → Automatic visitors & effects**, enter a minimum and maximum
+delay (1–300 seconds), then choose **Apply timing**. Equal values give a fixed
+interval. The default is 3–10 seconds. Check which visitors and triggered effects
+should participate; checkbox changes save immediately. **Select all** restores
+the full selection; **Clear** pauses random triggers without disabling manual
+buttons. A visitor already playing finishes before it can be selected again.
+
+Timing and included items are restored from the saved show settings after a
+restart. Start show enables automation using your chosen timing and selection.
+API settings fields are `random_min_seconds`, `random_max_seconds`, and
+`random_triggers` (names from the status `auto_catalog`). Send both timing values
+together when changing to a range outside the current bounds.
