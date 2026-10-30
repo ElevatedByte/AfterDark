@@ -6,7 +6,7 @@ import threading
 import time
 import cv2
 from app.camera.camera_manager import CameraManager
-from app.cues.automation import RandomShow
+from app.cues.automation import RandomShow, trigger_allowed
 from app.renderer.compositor import (
     standby_frame,
     draw_debug,
@@ -20,6 +20,7 @@ from app.tracking.pose_tracker import MediaPipePoseTracker
 from app.tracking.person_tracker import PersonTracker
 from app.tracking.gesture_detector import GestureDetector
 from app.effects.manager import EffectManager
+from app.renderer.scenery import Scenery
 
 log = logging.getLogger(__name__)
 
@@ -35,6 +36,7 @@ class Runtime:
         self.identities = PersonTracker(config.tracking_smoothing, config.track_timeout)
         self.gestures = GestureDetector(config)
         self.effects = EffectManager()
+        self.scenery = Scenery()
         self.random_show = RandomShow()
         self._tracking_revision = 0
         self.projector = Projector(config)
@@ -339,7 +341,11 @@ class Runtime:
             self.effects.active_cues,
             minimum=snapshot["random_min_seconds"],
             maximum=snapshot["random_max_seconds"],
-            included=snapshot["random_triggers"],
+            included=[
+                name
+                for name in snapshot["random_triggers"]
+                if trigger_allowed(name, snapshot["disabled_effects"])
+            ],
         )
         if automatic:
             self.state.trigger_automatic(automatic)
@@ -348,6 +354,8 @@ class Runtime:
                 trigger = self.state.commands.get_nowait()
             except queue.Empty:
                 break
+            if not trigger_allowed(trigger, snapshot["disabled_effects"]):
+                continue
             self.effects.trigger(trigger, people, manual=True)
             if trigger in ("scream", "lightning", "ghost_appearance"):
                 self.projector.send(
@@ -360,6 +368,7 @@ class Runtime:
         view, offset = camera_viewport(frame, width, height)
         # Normalized landmarks/masks stay in camera coordinates. The matching
         # high-resolution viewport preserves alignment without another inference.
+        view = self.scenery.render(view, snapshot)
         view = self.effects.render(view, people, dt)
         if snapshot["debug_skeleton"]:
             draw_debug(view, people)

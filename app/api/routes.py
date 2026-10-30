@@ -111,3 +111,8 @@ async def preview_stream(request: Request):
         media_type="multipart/x-mixed-replace; boundary=frame",
         headers={"Cache-Control": "no-store"},
     )
+
+
+@router.post("/scenery/generate")
+def scenery_generate(request: Request, patch: SettingsPatch):
+    return execute(request, action="scenery_generate", settings=patch)

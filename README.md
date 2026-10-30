@@ -6,6 +6,31 @@ A Linux-first, local Python application that turns an RGB webcam into an interac
 
 Implemented: camera capture and reconnect, MediaPipe multi-pose tracking and person segmentation, stable internal IDs, gesture detection, ten effects, ten live cue animations, five scenes, per-person effect assignments, WebSocket control, live composite preview, fullscreen output, optional sounds, and an explicit synthetic rehearsal mode.
 
+## Visual gallery
+
+### Randomized Halloween scenery
+
+Haunted houses, spooky trees, graves, jack-o’-lanterns, and optional corner webs.
+Choose object counts in the controller and generate a new layout while keeping
+space open for dancing. This rendered example uses the standby background, not
+live camera footage.
+
+![Halloween scenery with houses, trees, graves, pumpkins, and corner spider webs](docs/images/scenery-preview.png)
+
+### Animated atmosphere
+
+Creeping fog, haunted eyes, and a ghost portal, shown at three stages of their
+animations. These are rendered artwork previews, not camera captures.
+
+![Three-stage previews of creeping fog, haunted eyes, and ghost portal animations](docs/images/atmosphere-storyboard.png)
+
+### Original visitor artwork
+
+The witch, ghost, spider, zombie hand, cat, and gravestone establish the visual
+style used throughout the show.
+
+![Original Halloween visitor sprite artwork](app/assets/overlays/visitors.png)
+
 ## Quick start
 
 ```bash
@@ -147,8 +172,8 @@ On Wayland, display placement/fullscreen mode is ultimately controlled by the co
 - Ten independent toggles: Pumpkin Head, Witch, Frankenstein, Vampire, Mummy, Skeleton, Bats, Ghost Trail, Magic Particles, Lightning. Debug skeleton is separate from the Halloween skeleton.
 - Sliders: effect intensity, ghost trail strength, particle amount, tracking smoothing.
 - Manual cues: Lightning, Spawn Bats, Ghost Appearance, Scream; keyboard **1–4** when not editing a field. Manual visual cues work even if their continuous effect toggle is off and no one is tracked.
-- In **Normal Camera** mode, new people automatically receive one random person-attached effect: Pumpkin Head, Witch, Frankenstein, Vampire, Mummy, Skeleton, Bats, Ghost Trail, or Magic Particles. The choice is made once per new internal ID and survives brief tracking dropouts. Lightning remains a full-screen scene/manual cue. Themed modes give everyone their selected effects by default, including new arrivals and reset tracks; individual changes remain available in every mode. Returning to Normal Camera (including Reset scene) gives existing tracks fresh random assignments too.
-- Per-person selector (available in every mode): change the assigned effect, choose Follow scene, or choose No effects. Operator choices are preserved while that ID remains tracked. The API also supports any combination of effects for a person. Overrides expire with the track, and a newly assigned ID does not inherit an old participant's override.
+- In **Normal Camera**, each person receives one allowed appearance: Pumpkin Head, Witch, Frankenstein, Vampire, Mummy, Skeleton, or Ghost Trail. Magic Particles accompany Witch and Vampire only, unless disabled in Motion effects. Mummy and Skeleton Head receive the skeleton body; Mummy retains its own head. Themed appearances take priority; scenes without an appearance receive a stable random one. Turning off an assigned appearance replaces it with another allowed appearance. If every appearance is disabled, those exclusions take priority.
+- The per-person selector chooses an appearance or Automatic appearance. Motion-only and empty legacy assignments receive an allowed appearance on the next processing frame. Assignments survive brief tracking dropouts and expire with the track. Magic Particles have a global off switch, but only Witch and Vampire receive them. Each person renders exactly one appearance, including when older saved scenes or API assignments contain several.
 - Reset tracking: clear identities, smoothing, gesture memory, and effects, then rebuild the pose tracker. IDs are not reused within a session.
 - Reset scene: return to Normal Camera and clear overrides/transient effects.
 
@@ -478,3 +503,40 @@ exact prompts are in `app/assets/overlays/atmosphere-generation-prompts.txt`.
 The portal reuses the original ghost sprite. Procedural fallbacks remain available
 if a new PNG is missing. Run `.venv/bin/python scripts/preview_atmosphere_cues.py`
 to render a three-stage storyboard at `artifacts/atmosphere-storyboard.png`.
+
+### Allowed effects sidebar
+
+The sidebar lists all ten effects and ten animated visitors. Choose **Allow all**,
+then turn off any unwanted items. **Ghost Trail / Appearance** disables both ghost
+trails on people and the ghost appearance cue; Ghost Parade and Ghost Portal have
+separate switches. Off switches stop playing items and block scene defaults,
+person overrides, gestures, and manual/automatic triggers. Choices save across
+scene changes and restarts. Normal Camera still gives each new person one random
+allowed effect; allowing everything does not layer every effect onto each person.
+
+### Random scene decorations
+
+Use **Scene decorations** below Set the scene. Choose 0–2 haunted houses, 0–12
+graves, and 0–16 jack-o’-lanterns, then click **Generate scene**. Each click applies
+and saves the counts and makes a new arrangement. Houses occupy back corners;
+smaller props scatter across a continuous ground plane in the side wings, with
+random sizes, perspective scaling, contact shadows, and natural depth overlap.
+Larger houses anchor each side. The central 40% of the camera viewport stays clear.
+**Show decorations** hides/restores the same arrangement. Counts and the layout
+seed survive restarts and scene changes. This is a fixed composition around the
+camera image, not physical floor detection or automatic avoidance of people who
+move into the side areas. Decorations render before person effects and visitors.
+
+New house and pumpkin sprites were created with the built-in image generator,
+using the original visitor atlas as a style reference. Assets are
+`app/assets/overlays/scenery-house.png` and `scenery-pumpkin.png`; exact prompts
+are in `app/assets/overlays/scenery-generation-prompts.txt`. The original
+gravestone sprite is reused. No network or image generation is needed at runtime.
+
+**Spooky trees** are also available in Scene decorations (0–4). They use matching
+storybook artwork, random sizes, grounded roots and contact shadows. The count
+saves with your other scenery choices. Existing saved files default to zero trees.
+
+**Corner spider webs** offers None, Top left, Top right, or Both top corners.
+Selection applies immediately and is saved without changing the random layout.
+Webs stay anchored to the top corners; Show decorations also hides them.

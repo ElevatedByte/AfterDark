@@ -516,3 +516,175 @@ cues to that saved selection (14 items total). Automation remains off, matching
 the user's current choice; enable it or use Start show when desired. Curated
 subsets are not automatically expanded. Pre-update status is retained at
 work/before-atmosphere-cues-status.json.
+
+## 2026-10-27 — Allowed effects sidebar
+
+Fixed the mismatch between sidebar scene effects and independent random person
+assignments/manual/automatic cues. The sidebar now exposes all ten effects and ten
+visitors as saved global permissions, with Allow all and Turn all off. New
+`SettingsPatch.disabled_effects` defaults to an empty list for older saved files;
+scene changes and resets preserve it. Scene activation and person overrides remain
+stored separately, but cannot bypass disabled effects. New Normal Camera random
+assignments choose only permitted effects (none if the pool is empty). Existing
+assignments remain stored, but their disabled effects are suppressed.
+
+EffectManager clears disabled active effects/visitors at the next frame, filters
+person effects and rejects their triggers. Runtime filters the automation pool
+and queued triggers, including sounds. State rejects disabled manual requests and
+stale automatic requests. Ghost Trail / Appearance controls both the ghost trail
+and ghost_appearance; Ghost Parade and Ghost Portal are separately selectable.
+Legacy effect enable/disable API calls also update permissions. Automation choices
+remain independent and cannot override sidebar exclusions. All twenty switches
+are on initially; this change does not turn on every overlay simultaneously.
+
+Verification: full suite 113 passed, then the added HTTP/WebSocket persistence
+case plus the other exclusion cases passed (27 targeted tests). Ruff and diff
+whitespace checks passed. All 18 synthetic SDL-dummy smoke checks passed after
+updating the smoke test to restore permissions following its disable tests.
+Restarted afterdark.service and confirmed live status, served HTML/JS and ten
+visitor entries, no runtime error. Show was idle and remains idle. Browser visual
+verification unavailable: computer-use browser inventory was empty. No physical
+camera/projector acceptance performed in this change.
+
+### Sidebar grouping
+
+Grouped Allowed effects into Visitors (the ten animated cues) and Appearances
+(the ten person/scene effects), using labeled fieldsets. Switch IDs, saved
+permissions, and Allow all/Turn all off behavior are unchanged. Static asset
+versions bumped; verified the served HTML, JavaScript routing and CSS.
+
+### Motion effects category
+
+Moved Magic Particles, Bats, and Lightning to their own Motion effects fieldset
+in the Allowed effects sidebar. Visitors and remaining Appearances keep their
+existing groups. Saved switches and effect behavior are unchanged. Verified live
+HTML and JavaScript serve the new category and all three item mappings.
+
+## 2026-10-27 — Random scenery generator
+
+Added Scene decorations form with house/grave/jack-o'-lantern counts and Generate
+scene, plus a saved show/hide toggle. Limits are 2/12/16 to bound edge density and
+render cost. Generate atomically saves counts, enables scenery and selects a new
+31-bit seed different from the previous one. Regeneration works via WebSocket
+scenery_generate and POST /api/scenery/generate. Invalid counts are rejected
+before mutation. Old saved files default to scenery hidden until generated.
+
+New app/renderer/scenery.py builds deterministic, nonoverlapping bounding boxes
+within the side wings (x <= .22 or x >= .78); houses sit in the back corners and
+smaller props occupy shuffled cells below them. Scaling preserves sprite aspect
+ratio and varies with depth. Renderer caches at most one layout's resized sprites
+(maximum 30), rebuilds on dimensions/seed/count changes, and composites before
+person effects/cues in Runtime. Central 56% remains untouched at all aspect ratios.
+Positions are compositional, not inferred physical camera floor coordinates; a
+person moving into the side wings may overlap a decoration. CPU path only; the
+experimental separate GPU stage has not been expanded in this change.
+
+Reused original gravestone. Generated transparent house and pumpkin sprites with
+built-in image_gen using visitors.png as style reference; copied originals into
+app/assets/overlays/scenery-{house,pumpkin}.png and stored exact prompts alongside.
+Visually inspected composite preview and confirmed new sprites' transparent alpha.
+Preview script scripts/preview_scenery.py produces artifacts/scenery-preview.png.
+
+Verification: all 120 tests passed, including 100 seeded maximum-count layouts,
+nonoverlap/bounds, 16:9/4:3/portrait central-clear rendering, bounded cache reuse,
+repeatability and regeneration, persistence, hide, zero counts, validation, HTTP
+and WebSocket generation. Ruff passed. All 19 synthetic SDL-dummy smoke checks
+passed, including generate/regenerate/render/hide. Deployed via user service
+restart; initialized a saved scene with 2 houses, 6 graves and 8 pumpkins. Camera,
+projector and automatic show remained stopped. Live API, served UI and rendered
+JPEG verified. Browser UI/physical projector acceptance unavailable this session.
+
+## 2026-10-27 — Natural ground-plane scenery revision
+
+Replaced the regular cell layout with continuous seeded placement. Houses now
+use 24–27.5% of viewport width and up to 57% height, grounded at 71–79% of
+viewport height. Props have much broader independent size variation plus depth
+scaling, with bases at 79–98.2% height. Bounded candidate sampling favors separate
+ground footprints without forbidding natural silhouette overlap. Back-to-front
+drawing and cached soft elliptical contact shadows establish a flat-ground feel.
+Sprites are trimmed to their visible silhouette before bottom anchoring.
+
+This supersedes the prior nonoverlap/56%-clear layout: side wings now extend to
+28.5% from each edge; the middle 40% is conservatively protected including
+shadows. Physical camera floor detection is still not used. Saved counts, seed,
+visibility and controls are unchanged; existing layouts use the new algorithm.
+
+Verified six scenery tests (including 100 max-count seeds, size variation, depth
+ordering, clear center at 16:9/4:3/portrait, persistence and API controls), Ruff,
+and diff whitespace. Inspected artifacts/scenery-preview.png to verify larger
+houses, natural overlap and randomized foreground sizes.
+
+## 2026-10-27 — Spooky tree scenery
+
+Added transparent scenery-tree.png, created with built-in image_gen using the
+house sprite as style reference. Prompt stored in tree-generation-prompt.txt.
+Added saved scenery_trees count (integer 0–4, old files default 0), included in
+Generate scene HTTP/WebSocket validation, frontend count form/status, and render
+cache key. Trees alternate side wings with seeded sizes and ground placement,
+contact shadows and depth sorting. Tree sampling follows other objects so adding
+or removing trees preserves the prior objects for the same seed. Maximum cache
+size is now 34 objects. Main dance-floor clearance remains unchanged.
+
+Seven scenery tests passed: max-count randomized placement, ground/depth bounds,
+three output aspects, saved controls over HTTP/WebSocket, invalid tree counts,
+zero defaults, and preservation of other objects when trees are added. Ruff and
+whitespace checks passed. Visually inspected sprite and composite preview; alpha
+channel confirmed. No physical projector or browser UI acceptance performed.
+
+## 2026-10-27 — Universal Magic Particles plus appearances
+
+Magic is now an independent layer applied to every tracked person in all scenes,
+including people with explicit assignments. The Allowed effects / Motion effects
+magic switch still disables it globally and clears live particles. Random person
+appearance selection excludes magic, bats and lightning. Each retained ID without
+an allowed appearance receives a stable allowed appearance; existing themed or
+manual appearances remain. Motion-only/empty legacy overrides are repaired, and
+disabling an appearance replaces it without accumulating disabled appearances.
+If all appearances are excluded, exclusions take precedence. Magic Mode receives
+an appearance while retaining its scene effects. The person dropdown now offers
+appearances plus Automatic appearance; motion controls remain global.
+
+Verification: 123 full-suite tests passed, followed by 35 targeted tests after
+refining disabled-appearance replacement. All 19 synthetic SDL-dummy smoke checks
+passed. Tests cover all scenes, particle recipient IDs, exclusions, stable manual
+choices, dropout and reset behavior. Updated prior tests that intentionally
+expected particle-only assignments. Ruff and diff whitespace passed. No physical
+multi-person performance acceptance performed; particles retain existing caps.
+
+## 2026-10-27 — Corner spider webs
+
+Added scenery-web.png using built-in image_gen with the house sprite as a style
+reference; exact prompt in web-generation-prompt.txt. Transparent artwork is
+anchored at the upper left and mirrored at the upper right. New saved enum
+scenery_webs supports none/left/right/both (old settings default none). Control
+applies immediately via settings and is included in Generate scene configuration.
+Rendering caches at most two resized web sprites separately from ground props,
+keeps aspect ratio within 26% width/40% height, and adds no ground shadows. Webs
+respect the shared Show decorations toggle. Changing web selection does not
+reroll or move ground objects. Added mode to the render cache key.
+
+Verified 11 scenery tests including all modes, mirror symmetry, floor clearance
+at three aspect ratios, hiding, saved selection, invalid values and generation
+API. Ruff/diff whitespace passed. Visually inspected composite preview showing
+both corners. Physical projector/browser UI acceptance not performed.
+
+## 2026-10-28 — Exclusive appearances and matched character layers
+
+Supersedes universal magic behavior from October 27. Renderer resolves exactly
+one allowed appearance per person, even with stale stacked lists. State repairs
+legacy explicit multi-appearance assignments to their first allowed appearance;
+multiple inherited scene appearances choose one once per tracked ID. Stable
+single choices remain stable and disabled choices are replaced as before.
+
+Magic hands are restricted to Witch/Vampire, including person-targeted manual
+spell bursts; global magic exclusion still wins. Empty-stage spell bursts remain
+supported. Skeleton keeps its existing skull+body. Extracted Skeleton.render_body
+allows a separate body-only renderer for Mummy, drawn before the mummy head,
+without drawing an extra skull. Other appearances get neither layer. Per-person
+UI help and Skeleton Head + Body label updated; asset cache version bumped.
+
+Verification: 130 regression tests passed, with new mixed-person recipient tests,
+legacy stacked state repair, defensive render filtering, and manual spell target
+filtering. Existing scene/dropout/reset tests updated for the new pairing rules.
+Ruff and diff whitespace passed. Physical camera/projector acceptance remains
+separate from synthetic verification.

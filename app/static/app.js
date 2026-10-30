@@ -1,12 +1,27 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const names = {normal_camera:'Normal Camera',pumpkin_dance:'Pumpkin Dance',skeleton_dance:'Skeleton Dance',ghost_mode:'Ghost Mode',magic_mode:'Magic Mode'};
-const effects = {pumpkin_head:['◈','Pumpkin Head'],witch:['✧','Witch'],frankenstein:['▣','Frankenstein'],vampire:['♜','Vampire'],mummy:['▤','Mummy'],skeleton:['☠','Skeleton'],bats:['⌁','Bats'],ghost:['♧','Ghost Trail'],magic:['✦','Magic Particles'],lightning:['ϟ','Lightning']};
+const effects = {pumpkin_head:['◈','Pumpkin Head'],witch:['✧','Witch'],frankenstein:['▣','Frankenstein'],vampire:['♜','Vampire'],mummy:['▤','Mummy'],skeleton:['☠','Skeleton Head + Body'],bats:['⌁','Bats'],ghost:['♧','Ghost Trail / Appearance'],magic:['✦','Magic Particles'],lightning:['ϟ','Lightning']};
 let state = null, socket, toastTimer, lastPeople = '', requestID = 0;
 const sliderTimers = {};
 const cueButtons = new Map();
 const automationChoices = new Map();
-let timingDraft = false;
+let timingDraft = false, sceneryDraft = false;
+const sceneryFields = ['scenery_houses','scenery_graves','scenery_pumpkins','scenery_trees'];
+for (const key of sceneryFields) $(key).oninput=()=>{sceneryDraft=true;};
+$('scenery_webs').onchange=e=>command({action:'settings',settings:{scenery_webs:e.target.value}});
+$('scenery_enabled').onchange=e=>command({action:'settings',settings:{scenery_enabled:e.target.checked}});
+$('scenery-form').onsubmit=e=>{
+  e.preventDefault();
+  const counts=Object.fromEntries(sceneryFields.map(key=>[key,Number($(key).value)]));
+  if (command({action:'scenery_generate',settings:{...counts,scenery_webs:$('scenery_webs').value}})) sceneryDraft=false;
+};
+function renderScenery(s) {
+  $('scenery_enabled').checked=!!s.scenery_enabled;
+  $('scenery_webs').value=s.scenery_webs || 'none';
+  if (!sceneryDraft) for (const key of sceneryFields) if(document.activeElement!==$(key)) $(key).value=s[key];
+  $('scenery-status').textContent=(s.scenery_enabled?'Showing':'Hidden')+' · '+s.scenery_houses+' houses · '+s.scenery_graves+' graves · '+s.scenery_pumpkins+' jack-o’-lanterns · '+s.scenery_trees+' trees · Webs: '+(s.scenery_webs || 'none');
+}
 function renderAutomation(s) {
   for (const group of ['Visitors','Effects']) {
     for (const [key, item] of Object.entries(s.auto_catalog || {})) {
@@ -25,10 +40,12 @@ function renderAutomation(s) {
     }
   }
   const selected=s.random_triggers || [];
+  const triggerTargets={ghost_appearance:'ghost',spawn_bats:'bats',spell_burst:'magic'};
+  const eligible=selected.filter(name=>!(s.disabled_effects || []).includes(triggerTargets[name] || name));
   for (const [name,input] of automationChoices) input.checked=selected.includes(name);
   if (!timingDraft) for (const key of ['random_min_seconds','random_max_seconds']) $(key).value=s[key];
   const timing=s.random_min_seconds===s.random_max_seconds?s.random_min_seconds:s.random_min_seconds+'–'+s.random_max_seconds;
-  $('automation-summary').textContent=!selected.length?'No items selected — automatic triggers are paused.':(s.random_show?'On':'Paused')+' · Every '+timing+' seconds · '+selected.length+' selected';
+  $('automation-summary').textContent=!eligible.length?'No allowed items selected — automatic triggers are paused.':(s.random_show?'On':'Paused')+' · Every '+timing+' seconds · '+eligible.length+' allowed and selected';
 }
 function renderCues(s) {
   for (const [key, cue] of Object.entries(s.cue_catalog || {})) {
@@ -57,12 +74,33 @@ function renderCues(s) {
     status.textContent = active ? 'Playing · click to restart' : duration + ' sec · click to play';
   }
 }
-for (const [key,[icon,label]] of Object.entries(effects)) {
-  const row=document.createElement('label');row.className='effect-row';
-  row.innerHTML=`<span><span class="effect-icon">${icon}</span>${label}</span><input class="switch" type="checkbox" id="effect-${key}" aria-label="${label}">`;
-  $('effects').append(row);
-  row.querySelector('input').addEventListener('change',e=>command({action:e.target.checked?'effect_enable':'effect_disable',value:key}));
+const allowedChoices = new Map();
+function renderAllowed(s) {
+  const catalog = {...effects, ...Object.fromEntries(Object.entries(s.cue_catalog || {}).map(([key,cue])=>[key,[cue.icon,cue.label]]))};
+  for (const [key,[icon,label]] of Object.entries(catalog)) {
+    if (allowedChoices.has(key)) continue;
+    const row=document.createElement('label');row.className='effect-row';
+    const text=document.createElement('span');text.textContent=icon+' '+label;
+    const input=document.createElement('input');input.className='switch';input.type='checkbox';input.id='effect-'+key;input.setAttribute('aria-label',label);
+    input.onchange=()=>command({action:'settings',settings:{disabled_effects:[...allowedChoices].filter(([,box])=>!box.checked).map(([name])=>name)}});
+    const group=Object.hasOwn(s.cue_catalog || {},key)?'effects-visitors':['magic','bats','lightning'].includes(key)?'effects-motion':'effects-appearances';
+    row.append(text,input);$(group).append(row);allowedChoices.set(key,input);
+  }
+  const disabled=s.disabled_effects || [];
+  for (const [name,input] of allowedChoices) input.checked=!disabled.includes(name);
+  $('effect-count').textContent=([...allowedChoices.keys()].filter(name=>!disabled.includes(name)).length)+' ALLOWED';
+  const targets={ghost_appearance:'ghost',spawn_bats:'bats',spell_burst:'magic'};
+  document.querySelectorAll('[data-trigger], [data-cue]').forEach(button=>{
+    const name=button.dataset.trigger || button.dataset.cue;
+    button.disabled=disabled.includes(targets[name] || name);
+  });
+  for (const [name,input] of automationChoices) {
+    input.disabled=disabled.includes(targets[name] || name);
+    input.parentElement.title=input.disabled?'Turn this on in Allowed effects to include it in the show.':'';
+  }
 }
+$('effects-select-all').onclick=()=>command({action:'settings',settings:{disabled_effects:[]}});
+$('effects-clear').onclick=()=>command({action:'settings',settings:{disabled_effects:[...allowedChoices.keys()]}});
 function toast(message) { $('toast').textContent=message;$('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').hidden=true,5000); }
 function command(payload) {
   if (!socket || socket.readyState!==WebSocket.OPEN) {toast('Controller disconnected. Reconnecting…'); return false;}
@@ -73,6 +111,8 @@ function render(s) {
   state=s;
   renderCues(s);
   renderAutomation(s);
+  renderAllowed(s);
+  renderScenery(s);
   const requested=s.camera_requested && s.projector_requested && s.random_show;
   const running=s.camera_running && s.projector_running;
   const stopping=!s.camera_requested && !s.projector_requested && (s.camera_running || s.projector_running);
@@ -92,8 +132,6 @@ function render(s) {
   $('demo-banner').hidden=!s.demo_mode;
   $('resolution').textContent=s.camera_resolution.join(' × ')+' → '+s.output_resolution.join(' × ');
   $('latency').textContent=s.frame_latency_ms+' ms';
-  $('effect-count').textContent=s.active_effects.length+' ACTIVE';
-  for(const key of Object.keys(effects)) $('effect-'+key).checked=s.active_effects.includes(key);
   document.querySelectorAll('[data-scene]').forEach(b=>{const active=b.dataset.scene===s.active_scene;b.classList.toggle('active',active);b.setAttribute('aria-pressed',active);});
   for(const key of ['fullscreen','debug_skeleton','adaptive_resolution','random_show']) $(key).checked=s[key];
   for(const key of ['projector_monitor_index','max_people']) if(document.activeElement!==$(key)) $(key).value=s[key];
@@ -109,13 +147,13 @@ function render(s) {
   const peopleKey=JSON.stringify([s.people.map(p=>p.id),s.person_effects,s.active_scene]);
   if(peopleKey!==lastPeople && !document.activeElement?.closest('#people')) {
     lastPeople=peopleKey;$('people').replaceChildren();
-    if(!s.people.length){const p=document.createElement('p');p.className='muted';p.textContent='New people start with random effects in Normal Camera, or the selected mode. You can change each person afterward.';$('people').append(p);}
+    if(!s.people.length){const p=document.createElement('p');p.className='muted';p.textContent='One appearance per person. Witch and Vampire get magic hands; Mummy and Skeleton Head get a skeleton body.';$('people').append(p);}
     for(const p of s.people) {
       const row=document.createElement('div');row.className='person';
       const label=document.createElement('label');label.htmlFor='person-'+p.id;label.textContent='Person '+p.id;
       const select=document.createElement('select');select.id='person-'+p.id;
-      for(const [value,label] of [['scene','Follow scene'],['none','No effects'],...Object.entries(effects).map(([k,v])=>[k,v[1]])]) select.add(new Option(label,value));
-      const assigned=s.person_effects[String(p.id)];select.value=assigned===undefined?'scene':assigned.length?assigned[0]:'none';
+      for(const [value,label] of [['scene','Automatic appearance'],...Object.entries(effects).filter(([key])=>!['magic','bats','lightning'].includes(key)).map(([k,v])=>[k,v[1]])]) select.add(new Option(label,value));
+      const assigned=s.person_effects[String(p.id)];select.value=assigned===undefined?'scene':assigned.find(name=>!['magic','bats','lightning'].includes(name)) || 'scene';
       select.onchange=()=>command({action:'person_effects',person_id:p.id,effects:select.value==='scene'?null:select.value==='none'?[]:[select.value]});
       row.append(label,select);$('people').append(row);
     }

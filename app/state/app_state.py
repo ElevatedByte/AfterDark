@@ -3,8 +3,9 @@
 from copy import deepcopy
 import logging
 from app.cues.catalog import LIVE_CUES
-from app.cues.automation import AUTO_CATALOG, AUTO_TRIGGERS
+from app.cues.automation import AUTO_CATALOG, AUTO_TRIGGERS, trigger_allowed
 import random
+import secrets
 from queue import Queue, Full, Empty
 from threading import RLock
 from typing import Literal
@@ -24,8 +25,10 @@ EFFECTS = (
     "lightning",
 )
 
-# Person-attached effects; lightning is a full-screen event.
-RANDOM_PERSON_EFFECTS = tuple(name for name in EFFECTS if name != "lightning")
+# Appearances are independent of motion effects applied alongside them.
+RANDOM_PERSON_EFFECTS = tuple(
+    name for name in EFFECTS if name not in ("magic", "bats", "lightning")
+)
 SCENES = {
     "normal_camera": [],
     "pumpkin_dance": ["pumpkin_head", "bats"],
@@ -48,6 +51,16 @@ TRIGGERS = (
 
 class SettingsPatch(BaseModel):
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    disabled_effects: list[str] | None = Field(
+        None, max_length=len(EFFECTS) + len(LIVE_CUES)
+    )
+    scenery_webs: Literal["none", "left", "right", "both"] | None = None
+    scenery_enabled: bool | None = None
+    scenery_seed: int | None = Field(None, ge=0, le=2**31 - 1, strict=True)
+    scenery_trees: int | None = Field(None, ge=0, le=4, strict=True)
+    scenery_houses: int | None = Field(None, ge=0, le=2, strict=True)
+    scenery_graves: int | None = Field(None, ge=0, le=12, strict=True)
+    scenery_pumpkins: int | None = Field(None, ge=0, le=16, strict=True)
     random_show: bool | None = None
     random_min_seconds: float | None = Field(None, ge=1, le=300)
     random_max_seconds: float | None = Field(None, ge=1, le=300)
@@ -61,6 +74,16 @@ class SettingsPatch(BaseModel):
     projector_monitor_index: int | None = Field(None, ge=0, le=15)
     max_people: int | None = Field(None, ge=1, le=8)
     adaptive_resolution: bool | None = None
+
+    @field_validator("disabled_effects")
+    @classmethod
+    def valid_disabled_effects(cls, value):
+        if value is None:
+            return value
+        catalog = (*EFFECTS, *LIVE_CUES)
+        if any(name not in catalog for name in value):
+            raise ValueError("Unknown effect or visitor")
+        return [name for name in catalog if name in value]
 
     @field_validator("random_triggers")
     @classmethod
@@ -129,6 +152,13 @@ class AppState:
             projector_monitor_actual=None,
             fullscreen=config.fullscreen,
             debug_skeleton=False,
+            scenery_webs="none",
+            scenery_enabled=False,
+            scenery_seed=0,
+            scenery_trees=0,
+            scenery_houses=2,
+            scenery_graves=6,
+            scenery_pumpkins=8,
             random_show=config.random_show,
             random_min_seconds=3.0,
             random_max_seconds=10.0,
@@ -139,6 +169,7 @@ class AppState:
             settings_save_error=None,
             active_scene="normal_camera",
             active_effects=[],
+            disabled_effects=[],
             active_cues=[],
             cue_catalog=LIVE_CUES,
             effect_settings=dict(
@@ -223,6 +254,24 @@ class AppState:
         else:
             self.update(settings_save_error=None)
 
+    def generate_scenery(self, patch=None):
+        values = patch.model_dump(exclude_none=True) if patch else {}
+        if values.keys() - {
+            "scenery_houses",
+            "scenery_graves",
+            "scenery_pumpkins",
+            "scenery_trees",
+            "scenery_webs",
+        }:
+            raise ValueError("Generate scene accepts only scenery configuration")
+        with self._lock:
+            # Never repeat the previous seed, even if the random source repeats.
+            seed = (
+                self._data["scenery_seed"] + 1 + secrets.randbelow(2**31 - 1)
+            ) % 2**31
+            self.update(**values, scenery_seed=seed, scenery_enabled=True)
+            self._save_settings()
+
     def set_show(self, running):
         with self._lock:
             if not running:
@@ -247,6 +296,7 @@ class AppState:
             if (
                 not self._data["random_show"]
                 or name not in self._data["random_triggers"]
+                or not trigger_allowed(name, self._data["disabled_effects"])
             ):
                 return
             try:
@@ -285,7 +335,12 @@ class AppState:
         with self._lock:
             active = set(self._data["active_effects"])
             active.add(name) if enabled else active.discard(name)
-            self.update(active_effects=[e for e in EFFECTS if e in active])
+            disabled = set(self._data["disabled_effects"])
+            disabled.discard(name) if enabled else disabled.add(name)
+            self.update(
+                active_effects=[e for e in EFFECTS if e in active],
+                disabled_effects=[e for e in (*EFFECTS, *LIVE_CUES) if e in disabled],
+            )
             self._save_settings()
 
     def settings(self, patch: SettingsPatch):
@@ -298,18 +353,37 @@ class AppState:
             self._save_settings()
 
     def sync_person_effects(self, new_person_ids, retained_person_ids):
-        """Set Normal Camera defaults once; preserve manual choices in every mode."""
+        """Keep one allowed appearance alongside motion effects for every person."""
         with self._lock:
             assignments = {
                 key: value
                 for key, value in self._data["person_effects"].items()
                 if int(key) in retained_person_ids
             }
-            if self._data["active_scene"] == "normal_camera":
-                for person_id in sorted(new_person_ids):
-                    key = str(person_id)
-                    if key not in assignments:
-                        assignments[key] = [random.choice(RANDOM_PERSON_EFFECTS)]
+            allowed = tuple(
+                e
+                for e in RANDOM_PERSON_EFFECTS
+                if e not in self._data["disabled_effects"]
+            )
+            for person_id in sorted(retained_person_ids):
+                key = str(person_id)
+                selected = assignments.get(key, self._data["active_effects"])
+                appearances = [e for e in selected if e in allowed]
+                if len(appearances) != 1 or key in assignments:
+                    # Collapse legacy stacked lists to one appearance. A scene
+                    # with multiple appearances chooses once per tracked person.
+                    chosen = (
+                        appearances[0]
+                        if key in assignments and appearances
+                        else random.choice(appearances or allowed)
+                        if appearances or allowed
+                        else None
+                    )
+                    normalized = [e for e in selected if e not in RANDOM_PERSON_EFFECTS]
+                    if chosen:
+                        normalized.append(chosen)
+                    if key in assignments or chosen:
+                        assignments[key] = normalized
             if assignments != self._data["person_effects"]:
                 self.update(person_effects=assignments)
             return deepcopy(assignments)
@@ -330,6 +404,8 @@ class AppState:
     def trigger(self, name):
         if name not in TRIGGERS:
             raise ValueError(f"Unknown trigger: {name}")
+        if not trigger_allowed(name, self.snapshot()["disabled_effects"]):
+            raise ValueError("This effect is turned off in Allowed effects")
         if name == "stop_animations":
             self.settings(SettingsPatch(random_show=False))
         if name == "reset_scene":

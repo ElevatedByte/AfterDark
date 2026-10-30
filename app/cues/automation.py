@@ -3,6 +3,18 @@
 import random
 from app.cues.catalog import LIVE_CUES
 
+TRIGGER_EFFECTS = {
+    "lightning": "lightning",
+    "spawn_bats": "bats",
+    "ghost_appearance": "ghost",
+    "spell_burst": "magic",
+}
+
+
+def trigger_allowed(name, disabled):
+    return TRIGGER_EFFECTS.get(name, name) not in disabled
+
+
 AUTO_TRIGGERS = (
     *LIVE_CUES,
     "lightning",

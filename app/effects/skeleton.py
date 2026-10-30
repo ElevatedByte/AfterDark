@@ -38,7 +38,7 @@ class Skeleton(HeadOverlay):
             cv2.line(image, (x, 215), (x, 247), (30, 37, 27, 255), 4, cv2.LINE_AA)
         return image
 
-    def render(self, frame):
+    def render_body(self, frame):
         intensity = self.settings.get("effect_intensity", 0.75)
         if not self.people or intensity <= 0:
             return frame
@@ -137,4 +137,7 @@ class Skeleton(HeadOverlay):
                             cv2.LINE_AA,
                         )
         frame = cv2.addWeighted(layer, intensity, frame, 1 - intensity, 0)
-        return super().render(frame)
+        return frame
+
+    def render(self, frame):
+        return super().render(self.render_body(frame))

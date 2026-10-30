@@ -12,6 +12,8 @@ def test_effect_lifecycle_and_visible_output(make_person):
     for name, effect in manager.effects.items():
         state.set_scene("normal_camera")
         state.set_effect(name, True)
+        if name == "magic":
+            state.set_effect("witch", True)
         manager.sync(state.snapshot())
         assert effect.enabled
         if name in ("lightning", "ghost", "bats", "magic"):
@@ -51,7 +53,10 @@ def test_assignments_filter_people_and_scene_reset(make_person):
     assert not manager.trigger("lightning", [make_person(1)])
     state.set_scene("normal_camera")
     manager.sync(state.snapshot())
-    assert not any(e.enabled or e.alive for e in manager.effects.values())
+    assert not manager.effects["magic"].enabled
+    assert not any(
+        e.enabled or e.alive for name, e in manager.effects.items() if name != "magic"
+    )
 
 
 def test_ghost_history_segmentation_decay_and_shape_change(make_person):
@@ -101,6 +106,8 @@ def test_zero_intensity_hides_every_effect(make_person):
     for name, effect in manager.effects.items():
         state.set_scene("normal_camera")
         state.set_effect(name, True)
+        if name == "magic":
+            state.set_effect("witch", True)
         manager.sync(state.snapshot())
         effect.trigger(people)
         result = manager.render(frame.copy(), people, 0.016)

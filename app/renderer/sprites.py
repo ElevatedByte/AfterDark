@@ -7,6 +7,10 @@ import numpy as np
 
 ASSET_DIR = Path(__file__).resolve().parents[1] / "assets/overlays"
 SPRITE_FILES = {
+    "scenery_web": "scenery-web.png",
+    "scenery_tree": "scenery-tree.png",
+    "scenery_house": "scenery-house.png",
+    "scenery_pumpkin": "scenery-pumpkin.png",
     "fog_bank": "creeping-fog.png",
     "haunted_eyes": "haunted-eyes.png",
     "portal_ring": "ghost-portal.png",

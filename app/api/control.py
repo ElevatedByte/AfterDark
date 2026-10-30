@@ -16,7 +16,9 @@ class Command(BaseModel):
 
 def dispatch(state, command: Command):
     action = command.action
-    if action in ("show_start", "show_stop"):
+    if action == "scenery_generate":
+        state.generate_scenery(command.settings)
+    elif action in ("show_start", "show_stop"):
         state.set_show(action == "show_start")
     elif action in ("camera_start", "camera_stop"):
         state.update(camera_requested=action == "camera_start", camera_error=None)

@@ -94,6 +94,16 @@ def main():
                 raise RuntimeError("Server never started")
             assert b"Afterdark" in request("/")
             report["checks"].append("dashboard_html")
+            scenery_counts = dict(scenery_houses=2, scenery_graves=6, scenery_pumpkins=8)
+            scenery = post("/api/scenery/generate", scenery_counts)
+            assert scenery["scenery_enabled"]
+            assert all(scenery[k] == v for k, v in scenery_counts.items())
+            regenerated = post("/api/scenery/generate", scenery_counts)
+            assert regenerated["scenery_seed"] != scenery["scenery_seed"]
+            wait_for(lambda s: s["scenery_enabled"] and s["fps"] > 0)
+            assert request("/api/output.jpg").startswith(b"\xff\xd8")
+            post("/api/settings", {"scenery_enabled": False})
+            report["checks"].append("scenery_generate_regenerate_render_and_hide")
             initial = wait_for(lambda s: s["tracked_people_count"] == 2)
             pool = set(RANDOM_PERSON_EFFECTS)
             assigned = initial["person_effects"]
@@ -107,7 +117,7 @@ def main():
             identity = initial["people"][0]["id"]
             post(f"/api/people/{identity}/effects", {"effects": None})
             time.sleep(0.3)
-            assert str(identity) not in status()["person_effects"]
+            assert set(status()["person_effects"][str(identity)]) & pool
             assert any(key != str(identity) for key in status()["person_effects"])
             report["checks"].append(
                 "random_new_person_effects_and_follow_scene_override"
@@ -138,7 +148,7 @@ def main():
                     lambda s: s["tracked_people_count"] == 2
                     and not previous_ids.intersection(p["id"] for p in s["people"])
                 )
-                if scene == "normal_camera":
+                if scene in ("normal_camera", "magic_mode"):
                     assert len(updated["person_effects"]) == 2
                 else:
                     assert updated["person_effects"] == {}
@@ -147,7 +157,7 @@ def main():
                         f"/api/people/{identity}/effects", {"effects": ["magic"]}
                     )["person_effects"][str(identity)] == ["magic"]
                     time.sleep(0.15)
-                    assert status()["person_effects"][str(identity)] == ["magic"]
+                    assert set(status()["person_effects"][str(identity)]) & pool
                     assert (
                         post(f"/api/people/{identity}/effects", {"effects": None})[
                             "person_effects"
@@ -164,6 +174,8 @@ def main():
                     not in post(f"/api/effects/{effect}/disable")["active_effects"]
                 )
             report["checks"].append("all_effect_toggles")
+            # Restore permission after testing the global off switches.
+            post("/api/settings", {"disabled_effects": []})
             identity = status()["people"][0]["id"]
             for effect in CHARACTER_EFFECTS:
                 assert post(f"/api/people/{identity}/effects", {"effects": [effect]})[
